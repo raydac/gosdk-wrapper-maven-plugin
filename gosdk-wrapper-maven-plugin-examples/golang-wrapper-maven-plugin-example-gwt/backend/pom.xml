@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.igormaznitsa</groupId>
+        <artifactId>golang-wrapper-maven-plugin-example-gwt</artifactId>
+        <version>0.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>backend</artifactId>
+    <packaging>jar</packaging>
+
+    <description>Backend part of the GoLang+GWT example, it implements the server side.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>frontend</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>gui-gwt</finalName>
+        <plugins>
+            <plugin>
+                <groupId>com.igormaznitsa</groupId>
+                <artifactId>mvn-golang-sec-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>go-get-open-golang</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>get</arg>
+                                <args>github.com/skratchdot/open-golang</args>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>go-get-bindata</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>install</arg>
+                                <arg>github.com/jteeuwen/go-bindata/...</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>go-generate</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>generate</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>go-build</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>build</arg>
+                                <arg>-o</arg>
+                                <arg>${project.build.outputDirectory}${file.separator}${project.build.finalName}</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

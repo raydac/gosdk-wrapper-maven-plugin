@@ -1,4 +1,8 @@
+.flattened-pom.xml
 target/
+bin/
+.build/
+.gopath/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -15,3 +19,6 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+
+.idea
+/go-sdk-wrapper-maven-plugin-parent.iml

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.igormaznitsa</groupId>
+        <artifactId>gosdk-wrapper-maven-plugin-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>gosdk-wrapper-maven-plugin-examples</artifactId>
+    <version>0.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <mvn.golang.go.version>1.21.7</mvn.golang.go.version>
+        <go.plugin.version>1.0.0-SNAPSHOT</go.plugin.version>
+        <go.target.folder>${project.basedir}${file.separator}bin</go.target.folder>
+        <go.source.folder>${project.basedir}${file.separator}src</go.source.folder>
+        <go.resource.folder>${project.basedir}${file.separator}res</go.resource.folder>
+        <go.target.temp.build>${project.basedir}${file.separator}.build</go.target.temp.build>
+        <go.path.folder>${project.basedir}${file.separator}.gopath</go.path.folder>
+    </properties>
+
+    <modules>
+        <module>golang-wrapper-maven-plugin-example-clui</module>
+        <module>golang-wrapper-maven-plugin-example-fyne</module>
+        <module>golang-wrapper-maven-plugin-example-goterm</module>
+        <module>golang-wrapper-maven-plugin-example-gwt</module>
+    </modules>
+
+    <name>Mvn Golang plugin tests</name>
+    <description>Set of tests for mvn-golang-sec-plugin</description>
+
+    <profiles>
+        <profile>
+            <id>go-mvn-plugin-profile</id>
+            <activation>
+                <file>
+                    <exists>src/go.mod</exists>
+                </file>
+            </activation>
+            <build>
+                <directory>${go.target.folder}</directory>
+                <resources>
+                    <resource>
+                        <directory>${go.resource.folder}</directory>
+                        <filtering>false</filtering>
+                    </resource>
+                </resources>
+
+                <plugins>
+                    <!-- Remove Go build folders -->
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-clean</id>
+                                <phase>none</phase>
+                            </execution>
+                            <execution>
+                                <id>remove-go-build-folders</id>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <phase>clean</phase>
+                                <configuration>
+                                    <failOnError>true</failOnError>
+                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                                    <filesets>
+                                        <fileset>
+                                            <directory>${go.path.folder}</directory>
+                                        </fileset>
+                                        <fileset>
+                                            <directory>${go.target.folder}</directory>
+                                        </fileset>
+                                        <fileset>
+                                            <directory>${go.target.temp.build}</directory>
+                                        </fileset>
+                                    </filesets>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- make temp common folder with sources and resources -->
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-resources</id>
+                                <phase>none</phase>
+                            </execution>
+                            <execution>
+                                <id>default-testResources</id>
+                                <phase>none</phase>
+                            </execution>
+                            <execution>
+                                <id>copy-resources-to-temp-build</id>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <phase>process-resources</phase>
+                                <configuration>
+                                    <outputDirectory>${go.target.temp.build}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${go.resource.folder}</directory>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                        <resource>
+                                            <directory>${go.source.folder}</directory>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- disable default maven plugin calls -->
+                    <plugin>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-jar</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-test</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-compile</id>
+                                <phase>none</phase>
+                            </execution>
+                            <execution>
+                                <id>default-testCompile</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-install-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-install</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.igormaznitsa</groupId>
+                    <artifactId>mvn-golang-sec-plugin</artifactId>
+                    <version>${go.plugin.version}</version>
+                    <configuration>
+                        <workDir>${go.target.temp.build}</workDir>
+                        <env>
+                            <GOBIN>${go.target.temp.build}</GOBIN>
+                            <GOPATH>${go.path.folder}</GOPATH>
+                        </env>
+                        <envLast>
+                            <PATH>${path.separator}${go.target.temp.build}</PATH>
+                        </envLast>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
