@@ -397,7 +397,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
                   "IOError during open stream for temporary file: " + tempArchivePath, ex);
             }
           },
-          x -> 10 * 1024 * 1024,
+          x -> 16 * 1024 * 1024,
           SDK_ARCHIVE_MIMES
       );
       this.logDebug("Headers: " + Arrays.toString(headers));
