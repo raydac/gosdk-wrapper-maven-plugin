@@ -53,32 +53,21 @@
                 <plugins>
                     <!-- Remove Go build folders -->
                     <plugin>
-                        <artifactId>maven-clean-plugin</artifactId>
+                        <groupId>com.igormaznitsa</groupId>
+                        <artifactId>gosdk-wrapper-maven-plugin</artifactId>
                         <executions>
-                            <execution>
-                                <id>default-clean</id>
-                                <phase>none</phase>
-                            </execution>
                             <execution>
                                 <id>remove-go-build-folders</id>
                                 <goals>
-                                    <goal>clean</goal>
+                                    <goal>delete-folders</goal>
                                 </goals>
-                                <phase>clean</phase>
                                 <configuration>
-                                    <failOnError>true</failOnError>
-                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                                    <filesets>
-                                        <fileset>
-                                            <directory>${go.path.folder}</directory>
-                                        </fileset>
-                                        <fileset>
-                                            <directory>${go.target.folder}</directory>
-                                        </fileset>
-                                        <fileset>
-                                            <directory>${go.target.temp.build}</directory>
-                                        </fileset>
-                                    </filesets>
+                                    <forceDelete>true</forceDelete>
+                                    <folders>
+                                        <folder>${go.path.folder}</folder>
+                                        <folder>${go.target.folder}</folder>
+                                        <folder>${go.target.temp.build}</folder>
+                                    </folders>
                                 </configuration>
                             </execution>
                         </executions>
@@ -120,6 +109,15 @@
                     </plugin>
 
                     <!-- disable default maven plugin calls -->
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-clean</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <artifactId>maven-jar-plugin</artifactId>
                         <executions>
@@ -170,7 +168,7 @@
             <plugins>
                 <plugin>
                     <groupId>com.igormaznitsa</groupId>
-                    <artifactId>mvn-golang-sec-plugin</artifactId>
+                    <artifactId>gosdk-wrapper-maven-plugin</artifactId>
                     <version>${go.plugin.version}</version>
                     <configuration>
                         <workDir>${go.target.temp.build}</workDir>

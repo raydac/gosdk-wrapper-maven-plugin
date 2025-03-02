@@ -20,7 +20,7 @@
         <plugins>
             <plugin>
                 <groupId>com.igormaznitsa</groupId>
-                <artifactId>mvn-golang-sec-plugin</artifactId>
+                <artifactId>gosdk-wrapper-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>go-get-glui</id>

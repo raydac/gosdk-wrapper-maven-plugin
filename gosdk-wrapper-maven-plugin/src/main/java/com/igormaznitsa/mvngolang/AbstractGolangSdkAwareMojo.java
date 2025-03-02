@@ -34,21 +34,17 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.core5.http.Header;
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.settings.Proxy;
-import org.apache.maven.settings.Settings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public abstract class AbstractGolangSdkAwareMojo extends AbstractMojo {
+public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
   public static final String SDK_NAME_PATTERN = "go%s.%s-%s%s";
   private static final List<String> SDK_ARCHIVE_MIMES =
@@ -59,21 +55,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractMojo {
           "application/x-gzip"
       );
   private static final long LOCK_FILE_SLEEP_MS = 100;
-
-  @Parameter(defaultValue = "${settings}", readonly = true)
-  protected Settings settings;
-  @Parameter(defaultValue = "${session}", readonly = true, required = true)
-  protected MavenSession session;
-  @Parameter(defaultValue = "${mojoExecution}", readonly = true, required = true)
-  protected MojoExecution execution;
-
-
-  /**
-   * Make verbose log output.
-   * @since 1.0.0
-   */
-  @Parameter(property = "mvn.golang.verbose", name = "verbose", defaultValue = "false")
-  protected boolean verbose;
   /**
    * Section describing proxy settings.
    * @since 1.0.0
@@ -86,12 +67,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractMojo {
    */
   @Parameter(property = "mvn.golang.disable.ssl.check", name = "disableSslCheck", defaultValue = "false")
   private boolean disableSslCheck;
-  /**
-   * Skip execution of the mojo.
-   * @since 1.0.0
-   */
-  @Parameter(property = "mvn.golang.skip", name = "skip", defaultValue = "false")
-  private boolean skip;
   /**
    * The site contains GoSDK archives.
    * @since 1.0.0
@@ -200,10 +175,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractMojo {
         (osxVersion == null || osxVersion.isBlank()) ? "" : "-" + osxVersion);
   }
 
-  protected static boolean isNullOrEmpty(final String text) {
-    return text == null || text.isBlank();
-  }
-
   private static String ensureSafeFileName(final String fileName) {
     final String baseName;
     final String extension;
@@ -258,7 +229,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractMojo {
 
   @Override
   public final void execute() throws MojoExecutionException, MojoFailureException {
-    if (this.skip) {
+    if (this.isSkip()) {
       this.logInfo("Skip execution");
       return;
     }
@@ -495,36 +466,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractMojo {
       } else {
         this.logWarn("Downloaded archive not removed for direct request: " + tempArchivePath);
       }
-    }
-  }
-
-  protected void logDebug(final String text) {
-    if (text != null && this.getLog().isDebugEnabled()) {
-      this.getLog().debug(text);
-    }
-  }
-
-  protected void logOptional(final String text) {
-    if (text != null && (this.verbose || this.getLog().isDebugEnabled())) {
-      this.getLog().info(text);
-    }
-  }
-
-  protected void logError(final String text) {
-    if (text != null && this.getLog().isErrorEnabled()) {
-      this.getLog().error(text);
-    }
-  }
-
-  protected void logInfo(final String text) {
-    if (text != null && this.getLog().isInfoEnabled()) {
-      this.getLog().info(text);
-    }
-  }
-
-  protected void logWarn(final String text) {
-    if (text != null && this.getLog().isWarnEnabled()) {
-      this.getLog().warn(text);
     }
   }
 

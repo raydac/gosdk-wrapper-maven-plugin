@@ -15,10 +15,6 @@
 
     <inceptionYear>2025</inceptionYear>
 
-    <prerequisites>
-        <maven>3.8.1</maven>
-    </prerequisites>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>

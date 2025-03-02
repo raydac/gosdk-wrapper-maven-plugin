@@ -18,6 +18,10 @@
         <maven.version>3.8.1</maven.version>
     </properties>
 
+    <prerequisites>
+        <maven>${maven.version}</maven>
+    </prerequisites>
+
     <profiles>
         <profile>
             <id>publish</id>

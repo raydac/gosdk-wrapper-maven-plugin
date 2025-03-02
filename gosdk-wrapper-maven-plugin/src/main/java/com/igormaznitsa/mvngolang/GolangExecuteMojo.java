@@ -8,8 +8,13 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
+/**
+ * Mojo loads and caching GoSDK and executing its selected tool.
+ *
+ * @since 1.0.0
+ */
 @Mojo(name = "execute", defaultPhase = LifecyclePhase.COMPILE, threadSafe = true, requiresDependencyResolution = ResolutionScope.COMPILE)
-public class GolangExecute extends AbstractGolangToolExecuteMojo {
+public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
 
   /**
    * Command to be executed.
@@ -19,6 +24,18 @@ public class GolangExecute extends AbstractGolangToolExecuteMojo {
   @Parameter(name = "command", defaultValue = "go")
   private String command;
 
+  /**
+   * Skip execution of the mojo.
+   *
+   * @since 1.0.0
+   */
+  @Parameter(property = "mvn.golang.execute.skip", name = "skip", defaultValue = "false")
+  private boolean skip;
+
+  @Override
+  protected boolean isSkip() {
+    return this.skip;
+  }
 
   @Override
   protected Path findCommand(final Path goSdkFolder, final Path jdkFolder) throws IOException {

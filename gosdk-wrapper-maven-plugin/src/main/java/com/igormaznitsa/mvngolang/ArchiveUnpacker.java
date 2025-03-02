@@ -100,7 +100,7 @@ public final class ArchiveUnpacker {
       throw new IOException("Failed to create output directory: " + outputDir);
     }
 
-    final ArchiveType archiveType = this.detectArchiveType(archiveFile);
+    final ArchiveType archiveType = detectArchiveType(archiveFile);
     if (unpackListener != null) {
       unpackListener.onArchiveType(this, archiveType);
     }
