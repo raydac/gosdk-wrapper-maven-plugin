@@ -1,26 +1,19 @@
 package com.igormaznitsa.mvngolang;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.Objects.requireNonNullElse;
-
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElse;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.LongFunction;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32C;
 import javax.annotation.Nonnull;
@@ -35,6 +28,7 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.ManagedHttpClientConnectionFactory;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
@@ -54,8 +48,6 @@ import org.apache.hc.core5.http.message.BasicHeaderValueParser;
 import org.apache.hc.core5.http.message.ParserCursor;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.ssl.SSLContexts;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ApacheHttpClient5Loader {
 
@@ -68,6 +60,7 @@ public class ApacheHttpClient5Loader {
     try {
       this.connectionManagerDefault = PoolingHttpClientConnectionManagerBuilder.create().build();
       this.connectionManagerNoSslCheck = PoolingHttpClientConnectionManagerBuilder.create()
+          .setConnectionFactory(ManagedHttpClientConnectionFactory.INSTANCE)
           .setTlsSocketStrategy(
               new DefaultClientTlsStrategy(
                   SSLContexts.custom()
