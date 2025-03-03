@@ -28,6 +28,7 @@
                             <goal>execute</goal>
                         </goals>
                         <configuration>
+                            <logFileStd>${go.reports.folder}${file.separator}stdout.txt</logFileStd>
                             <args>
                                 <arg>get</arg>
                                 <arg>-u</arg>

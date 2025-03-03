@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -102,12 +103,26 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private int expectedExitCode;
 
   /**
-   * Hide process output in maven log.
+   * Hide process output in maven log. File logs continue work.
    *
    * @since 1.0.0
    */
   @Parameter(name = "hideProcessOutput", defaultValue = "false")
   private boolean hideProcessOutput;
+
+  protected void ensureParentFolderExists(@Nonnull final File file) throws MojoExecutionException {
+    final File parent = file.getParentFile();
+    if (parent == null) {
+      throw new MojoExecutionException("Can't find parent folder for file: " + file);
+    }
+    if (parent.isDirectory()) {
+      return;
+    }
+    this.logDebug("Making folder: " + parent);
+    if (!parent.mkdirs()) {
+      throw new MojoExecutionException("Can't create folder: " + parent);
+    }
+  }
 
   @Override
   protected void onMojoExecute(final Path goSdkFolder)
@@ -178,16 +193,23 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
 
     processBuilder.redirectErrorStream(false);
 
-    if (!isNullOrEmpty(this.logFileErr)) {
-      final File fileErrorLog = new File(this.logFileErr.trim());
-      this.logInfo("Redirect process error output to: " + fileErrorLog);
-      processBuilder.redirectError(fileErrorLog);
+    final File targetOutputFile;
+    final File targetErrorFile;
+
+    if (isNullOrEmpty(this.logFileErr)) {
+      targetErrorFile = null;
+    } else {
+      targetErrorFile = new File(this.logFileErr.trim());
+      this.ensureParentFolderExists(targetErrorFile);
+      this.logInfo("Redirect process error output to: " + targetErrorFile);
     }
 
-    if (!isNullOrEmpty(this.logFileStd)) {
-      final File fileStdOutLog = new File(this.logFileStd.trim());
-      this.logInfo("Redirect process standard output to: " + fileStdOutLog);
-      processBuilder.redirectOutput(fileStdOutLog);
+    if (isNullOrEmpty(this.logFileStd)) {
+      targetOutputFile = null;
+    } else {
+      targetOutputFile = new File(this.logFileStd.trim());
+      this.ensureParentFolderExists(targetOutputFile);
+      this.logInfo("Redirect process standard output to: " + targetOutputFile);
     }
 
     final Process process;
@@ -220,14 +242,36 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       throw new MojoFailureException("Can't start process for exception", ex);
     }
 
-    if (!this.hideProcessOutput) {
-      if (isNullOrEmpty(this.logFileStd)) {
-        this.catchStream(process.getErrorStream(), line -> this.logInfo("STD<: " + line));
-      }
-      if (isNullOrEmpty(this.logFileErr)) {
-        this.catchStream(process.getInputStream(), line -> this.logError("ERR<: " + line));
-      }
+    if (this.hideProcessOutput) {
+      this.logInfo("Hide process output");
     }
+
+    this.catchStream(process.getErrorStream(), line -> {
+      if (!this.hideProcessOutput) {
+        this.logInfo(">STD: " + line);
+      }
+      if (targetOutputFile != null) {
+        try {
+          FileUtils.write(targetOutputFile, line + System.lineSeparator(),
+              Charset.defaultCharset(), true);
+        } catch (IOException ex) {
+          this.logError("Can't append record to log output file: " + ex.getMessage());
+        }
+      }
+    });
+    this.catchStream(process.getInputStream(), line -> {
+      if (!this.hideProcessOutput) {
+        this.logError(">ERR: " + line);
+      }
+      if (targetErrorFile != null) {
+        try {
+          FileUtils.write(targetErrorFile, line + System.lineSeparator(),
+              Charset.defaultCharset(), true);
+        } catch (IOException ex) {
+          this.logError("Can't append record to log err file: " + ex.getMessage());
+        }
+      }
+    });
 
     final int exitCode;
     try {

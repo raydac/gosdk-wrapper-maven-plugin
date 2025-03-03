@@ -20,6 +20,7 @@
         <go.source.folder>${project.basedir}${file.separator}src</go.source.folder>
         <go.resource.folder>${project.basedir}${file.separator}res</go.resource.folder>
         <go.target.temp.build>${project.basedir}${file.separator}.build</go.target.temp.build>
+        <go.reports.folder>${project.basedir}${file.separator}.reports</go.reports.folder>
         <go.path.folder>${project.basedir}${file.separator}.gopath</go.path.folder>
     </properties>
 
@@ -67,6 +68,7 @@
                                         <folder>${go.path.folder}</folder>
                                         <folder>${go.target.folder}</folder>
                                         <folder>${go.target.temp.build}</folder>
+                                        <folder>${go.reports.folder}</folder>
                                     </folders>
                                 </configuration>
                             </execution>
