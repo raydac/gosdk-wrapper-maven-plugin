@@ -27,7 +27,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
    *
    * @since 1.0.0
    */
-  @Parameter(name = "workDir", defaultValue = "${project.baseDir}${file.separator}src")
+  @Parameter(name = "workDir", defaultValue = "${project.basedir}${file.separator}src")
   private String workDir;
 
   /**

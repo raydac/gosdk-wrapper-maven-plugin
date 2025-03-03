@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.igormaznitsa</groupId>
         <artifactId>gosdk-wrapper-maven-plugin-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>gosdk-wrapper-maven-plugin-examples</artifactId>
@@ -15,7 +15,7 @@
 
     <properties>
         <mvn.golang.go.version>1.24.0</mvn.golang.go.version>
-        <go.plugin.version>1.0.0</go.plugin.version>
+        <go.plugin.version>1.0.1-SNAPSHOT</go.plugin.version>
         <go.target.folder>${project.basedir}${file.separator}bin</go.target.folder>
         <go.source.folder>${project.basedir}${file.separator}src</go.source.folder>
         <go.resource.folder>${project.basedir}${file.separator}res</go.resource.folder>
