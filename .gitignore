@@ -22,3 +22,4 @@ buildNumber.properties
 
 .idea
 /go-sdk-wrapper-maven-plugin-parent.iml
+/gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-clui/.reports/stdout.txt

@@ -8,10 +8,8 @@
     <packaging>pom</packaging>
 
     <name>GoSDK wrapper maven plugin parent</name>
-    <description>Maven plugin to wrap main GoLang commands and provide way to build GoLang applications with Apache
-        Maven build tool.
-    </description>
-    <url>https://github.com/raydac/mvn-golang-sec</url>
+    <description>A maven plugin to download GoSDK and call its commands in Maven.</description>
+    <url>https://github.com/raydac/gosdk-wrapper-maven-plugin</url>
 
     <inceptionYear>2025</inceptionYear>
 
@@ -24,7 +22,7 @@
 
     <issueManagement>
         <system>GitHub Issues</system>
-        <url>https://github.com/raydac/mvn-golang-sec/issues</url>
+        <url>https://github.com/raydac/gosdk-wrapper-maven-plugin/issues</url>
     </issueManagement>
 
     <developers>
@@ -41,9 +39,9 @@
     </developers>
 
     <scm>
-        <url>https://github.com/raydac/mvn-golang-sec</url>
-        <connection>scm:git:git://github.com/raydac/mvn-golang-sec.git</connection>
-        <developerConnection>scm:git:git@github.com:raydac/mvn-golang-sec.git</developerConnection>
+        <url>https://github.com/raydac/gosdk-wrapper-maven-plugin</url>
+        <connection>scm:git:git://github.com/raydac/gosdk-wrapper-maven-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:raydac/gosdk-wrapper-maven-plugin.git</developerConnection>
     </scm>
 
     <organization>
@@ -62,6 +60,15 @@
     <modules>
         <module>gosdk-wrapper-maven-plugin</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>start-examples</id>
+            <modules>
+                <module>gosdk-wrapper-maven-plugin-examples</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <build>
         <pluginManagement>
