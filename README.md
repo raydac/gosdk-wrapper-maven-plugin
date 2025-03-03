@@ -14,3 +14,99 @@ __1.0.0 (SNAPSHOT)__
 - initial version
 
 [full changelog](https://github.com/raydac/gosdk-wrapper-maven-plugin/blob/master/CHANGELOG.md)
+
+# What is it?
+
+A simple Maven plugin that automates working with GoSDK in Maven projects. It handles downloading GoSDK, caching it in a
+specified directory, and invoking its tools.
+
+Originally, there was a project called [mvn-golang](https://github.com/raydac/mvn-golang) that provided similar
+functionality. However, since then, the Go ecosystem has changed significantly. I decided to create a simpler plugin
+focused solely on downloading and executing GoSDK, removing features related to package installation, repository
+management, and processing. Now, this is just a Maven plugin dedicated to fetching and running Go tools.
+
+# How to use
+
+Let's take a look at the call go to print its help. Just add the plugin into the module build section.
+
+```xml
+
+<plugin>
+    <groupId>com.igormaznitsa</groupId>
+    <artifactId>gosdk-wrapper-maven-plugin</artifactId>
+    <version>1.0.0</version>
+    <configuration>
+        <goVersion>1.24.0</goVersion>
+    </configuration>
+    <executions>
+        <execution>
+            <id>go-help</id>
+            <goals>
+                <goal>execute</goal>
+            </goals>
+            <configuration>
+                <args>
+                    <arg>help</arg>
+                </args>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+```
+
+So now it will download and cached GoSDK and make call go tool with help CLI argument.
+In the same time you can see log records of a lot of another maven plugin dedicated to Java project. You can disable
+them with below code snippet.
+
+```xml
+
+<plugin>
+    <artifactId>maven-clean-plugin</artifactId>
+    <executions>
+        <execution>
+            <id>default-clean</id>
+            <phase>none</phase>
+        </execution>
+    </executions>
+</plugin>
+<plugin>
+<artifactId>maven-jar-plugin</artifactId>
+<executions>
+    <execution>
+        <id>default-jar</id>
+        <phase>none</phase>
+    </execution>
+</executions>
+</plugin>
+<plugin>
+<artifactId>maven-surefire-plugin</artifactId>
+<executions>
+    <execution>
+        <id>default-test</id>
+        <phase>none</phase>
+    </execution>
+</executions>
+</plugin>
+<plugin>
+<artifactId>maven-compiler-plugin</artifactId>
+<executions>
+    <execution>
+        <id>default-compile</id>
+        <phase>none</phase>
+    </execution>
+    <execution>
+        <id>default-testCompile</id>
+        <phase>none</phase>
+    </execution>
+</executions>
+</plugin>
+<plugin>
+<artifactId>maven-install-plugin</artifactId>
+<executions>
+    <execution>
+        <id>default-install</id>
+        <phase>none</phase>
+    </execution>
+</executions>
+</plugin>
+```
