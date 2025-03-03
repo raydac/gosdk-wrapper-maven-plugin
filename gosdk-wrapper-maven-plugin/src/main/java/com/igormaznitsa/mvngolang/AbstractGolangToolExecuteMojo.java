@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -98,6 +100,14 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
    */
   @Parameter(name = "expectedExitCode", defaultValue = "0")
   private int expectedExitCode;
+
+  /**
+   * Hide process output in maven log.
+   *
+   * @since 1.0.0
+   */
+  @Parameter(name = "hideProcessOutput", defaultValue = "false")
+  private boolean hideProcessOutput;
 
   @Override
   protected void onMojoExecute(final Path goSdkFolder)
@@ -210,11 +220,13 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       throw new MojoFailureException("Can't start process for exception", ex);
     }
 
-    if (isNullOrEmpty(this.logFileStd)) {
-      catchStream(process.getErrorStream(), line -> this.logInfo(">STD: " + line));
-    }
-    if (isNullOrEmpty(this.logFileErr)) {
-      catchStream(process.getInputStream(), line -> this.logError(">ERROR: " + line));
+    if (!this.hideProcessOutput) {
+      if (isNullOrEmpty(this.logFileStd)) {
+        this.catchStream(process.getErrorStream(), line -> this.logInfo("STD<: " + line));
+      }
+      if (isNullOrEmpty(this.logFileErr)) {
+        this.catchStream(process.getInputStream(), line -> this.logError("ERR<: " + line));
+      }
     }
 
     final int exitCode;
@@ -256,7 +268,9 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     }
   }
 
-  protected abstract Path findCommand(final Path goSdkFolder, final Path jdkFolder)
+  @Nullable
+  protected abstract Path findCommand(@Nonnull final Path goSdkFolder,
+                                      @Nonnull final Path jdkFolder)
       throws IOException;
 
 }

@@ -74,7 +74,7 @@
                             <args>
                                 <arg>build</arg>
                                 <arg>-o</arg>
-                                <arg>${project.build.outputDirectory}${file.separator}${project.build.finalName}</arg>
+                                <arg>${go.target.folder}${file.separator}${project.build.finalName}</arg>
                             </args>
                         </configuration>
                     </execution>

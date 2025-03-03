@@ -190,6 +190,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     return extension.isEmpty() ? processedBaseName : processedBaseName + "." + extension;
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   protected static int printCliProgressBar(
       final String prefix,
       final String postfix,

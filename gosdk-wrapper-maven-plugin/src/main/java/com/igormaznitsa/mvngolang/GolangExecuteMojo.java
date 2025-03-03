@@ -3,6 +3,8 @@ package com.igormaznitsa.mvngolang;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -38,7 +40,9 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
   }
 
   @Override
-  protected Path findCommand(final Path goSdkFolder, final Path jdkFolder) throws IOException {
+  @Nullable
+  protected Path findCommand(@Nonnull final Path goSdkFolder, @Nonnull final Path jdkFolder)
+      throws IOException {
     this.logOptional("GoSDK path: " + goSdkFolder);
     this.logDebug("Find command: " + this.command);
     if (isNullOrEmpty(this.command)) {

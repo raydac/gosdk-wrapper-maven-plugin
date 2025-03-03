@@ -89,7 +89,7 @@ public final class ArchiveUnpacker {
         signature[3] == 0x21);
   }
 
-  private static boolean isGz(byte[] signature) throws IOException {
+  private static boolean isGz(byte[] signature) {
     return signature[0] == 0x1F && signature[1] == (byte) 0x8B;
   }
 

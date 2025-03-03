@@ -9,7 +9,7 @@
         <version>0.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>golang-wrapper-maven-plugin-example-gwt</artifactId>
+    <artifactId>gosdk-wrapper-maven-plugin-example-gwt</artifactId>
     <packaging>pom</packaging>
 
     <properties>

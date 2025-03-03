@@ -9,32 +9,18 @@
         <version>0.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>golang-wrapper-maven-plugin-example-clui</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <artifactId>gosdk-wrapper-maven-plugin-example-fyne</artifactId>
     <packaging>jar</packaging>
 
-    <description>Example of usage CLUI library for GUI (https://github.com/VladimirMarkelov/clui).</description>
+    <description>It builds a sample from https://github.com/fyne-io/fyne</description>
 
     <build>
-        <finalName>clui</finalName>
+        <finalName>fyne</finalName>
         <plugins>
             <plugin>
                 <groupId>com.igormaznitsa</groupId>
                 <artifactId>gosdk-wrapper-maven-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>go-get-glui</id>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <args>
-                                <arg>get</arg>
-                                <arg>-u</arg>
-                                <arg>github.com/VladimirMarkelov/clui</arg>
-                            </args>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>go-build</id>
                         <goals>

@@ -132,6 +132,7 @@ public class ApacheHttpClient5Loader {
     void apply(long downloaded, long total, int progress);
   }
 
+  @SuppressWarnings("resource")
   public static Header[] loadResource(
       final String httpMethod,
       final HttpClient httpClient,
@@ -364,7 +365,7 @@ public class ApacheHttpClient5Loader {
         } else if (this.hasCrc32c()) {
           final CRC32C crc = new CRC32C();
           final byte[] buffer = new byte[0x1FFFF];
-          int bytesRead = 0;
+          int bytesRead;
           while ((bytesRead = in.read(buffer, 0, buffer.length)) !=
               -1) {
             if (bytesRead > 0) {

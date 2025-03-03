@@ -9,13 +9,13 @@
         <version>0.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>golang-wrapper-maven-plugin-example-fyne</artifactId>
+    <artifactId>gosdk-wrapper-maven-plugin-example-goterm</artifactId>
     <packaging>jar</packaging>
 
-    <description>It builds a sample from https://github.com/fyne-io/fyne</description>
+    <description>Example of GoTerm usage with GoLang https://github.com/buger/goterm</description>
 
     <build>
-        <finalName>fyne</finalName>
+        <finalName>term-gui</finalName>
         <plugins>
             <plugin>
                 <groupId>com.igormaznitsa</groupId>
