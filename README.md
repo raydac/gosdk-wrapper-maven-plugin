@@ -9,7 +9,7 @@
 
 # Changelog
 
-__1.0.0 (SNAPSHOT)__
+__1.0.0 (03-mar-2025)__
 
 - initial version
 
@@ -24,6 +24,17 @@ Originally, there was a project called [mvn-golang](https://github.com/raydac/mv
 functionality. However, since then, the Go ecosystem has changed significantly. I decided to create a simpler plugin
 focused solely on downloading and executing GoSDK, removing features related to package installation, repository
 management, and processing. Now, this is just a Maven plugin dedicated to fetching and running Go tools.
+
+# Mojos on board
+
+## execute
+
+Download a GoSDK if not cached and find a tool to be executed with provided environment variables.
+
+## delete-folders
+
+Some Go packages can't be removed by regular maven clean plugin because can contain read only files. This mojo allows to
+remove such folders.
 
 # How to use
 
