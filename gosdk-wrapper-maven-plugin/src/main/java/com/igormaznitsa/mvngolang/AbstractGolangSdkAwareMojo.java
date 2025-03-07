@@ -1,12 +1,13 @@
 package com.igormaznitsa.mvngolang;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.System.out;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.System.out;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -67,6 +68,12 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.disable.ssl.check", name = "disableSslCheck", defaultValue = "false")
   private boolean disableSslCheck;
+  /**
+   * Hide SDK loading indicator.
+   * @since 1.0.1
+   */
+  @Parameter(property = "mvn.golang.hide.load.indicator", name = "hideLoadIndicator", defaultValue = "false")
+  private boolean hideLoadIndicator;
   /**
    * The site contains GoSDK archives.
    * @since 1.0.0
@@ -378,7 +385,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
           (loaded, size, progress) -> {
             if (progress >= 0 && lastProgress.get() != progress) {
               lastProgress.set(progress);
-              if (!this.session.isParallel()) {
+              if (!this.session.isParallel() || this.hideLoadIndicator) {
                 final String sizeText = (size / 1024L) + "Mb";
                 final String loadedText = (loaded / 1024L) + "Mb";
                 printCliProgressBar("Loading GoSDK:", ' ' + loadedText + '/' + sizeText,
