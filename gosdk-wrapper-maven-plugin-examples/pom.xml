@@ -22,9 +22,11 @@
         <go.target.temp.build>${project.basedir}${file.separator}.build</go.target.temp.build>
         <go.reports.folder>${project.basedir}${file.separator}.reports</go.reports.folder>
         <go.path.folder>${project.basedir}${file.separator}.gopath</go.path.folder>
+        <final.file.extension></final.file.extension>
     </properties>
 
     <modules>
+        <module>gosdk-wrapper-maven-plugin-example-hello-world</module>
         <module>gosdk-wrapper-maven-plugin-example-clui</module>
         <module>gosdk-wrapper-maven-plugin-example-fyne</module>
         <module>gosdk-wrapper-maven-plugin-example-goterm</module>
@@ -35,6 +37,17 @@
     <description>Set of tests for mvn-golang-sec-plugin</description>
 
     <profiles>
+        <profile>
+            <id>under-windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <final.file.extension>.exe</final.file.extension>
+            </properties>
+        </profile>
         <profile>
             <id>go-mvn-plugin-profile</id>
             <activation>

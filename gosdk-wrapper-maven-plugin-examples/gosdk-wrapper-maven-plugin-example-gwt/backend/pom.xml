@@ -5,7 +5,7 @@
 
     <parent>
         <groupId>com.igormaznitsa</groupId>
-        <artifactId>golang-wrapper-maven-plugin-example-gwt</artifactId>
+        <artifactId>gosdk-wrapper-maven-plugin-example-gwt</artifactId>
         <version>0.0.0-SNAPSHOT</version>
     </parent>
 
@@ -16,8 +16,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>frontend</artifactId>
+            <groupId>com.igormaznitsa</groupId>
+            <artifactId>gosdk-wrapper-maven-plugin-example-gwt-frontend</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -74,7 +74,9 @@
                             <args>
                                 <arg>build</arg>
                                 <arg>-o</arg>
-                                <arg>${go.target.folder}${file.separator}${project.build.finalName}</arg>
+                                <arg>
+                                    ${go.target.folder}${file.separator}${project.build.finalName}${final.file.extension}
+                                </arg>
                             </args>
                         </configuration>
                     </execution>

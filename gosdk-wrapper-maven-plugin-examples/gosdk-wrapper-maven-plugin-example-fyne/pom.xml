@@ -30,7 +30,9 @@
                             <args>
                                 <arg>build</arg>
                                 <arg>-o</arg>
-                                <arg>${go.target.folder}${file.separator}${project.build.finalName}</arg>
+                                <arg>
+                                    ${go.target.folder}${file.separator}${project.build.finalName}${final.file.extension}
+                                </arg>
                             </args>
                         </configuration>
                     </execution>

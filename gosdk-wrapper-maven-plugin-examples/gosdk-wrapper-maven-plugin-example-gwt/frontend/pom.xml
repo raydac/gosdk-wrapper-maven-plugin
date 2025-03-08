@@ -7,11 +7,11 @@
 
     <parent>
         <groupId>com.igormaznitsa</groupId>
-        <artifactId>golang-wrapper-maven-plugin-example-gwt</artifactId>
+        <artifactId>gosdk-wrapper-maven-plugin-example-gwt</artifactId>
         <version>0.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>frontend</artifactId>
+    <artifactId>gosdk-wrapper-maven-plugin-example-gwt-frontend</artifactId>
     <packaging>jar</packaging>
 
     <description>Frontend part of the GoLang+GWT example, it implements web based GUI.</description>
