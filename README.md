@@ -9,6 +9,11 @@
 
 # Changelog
 
+__1.0.1 (SNAPSHOT)__
+
+- added flag `hideLoadIndicator` to hide GoSDK loading bar from log
+- fixed wrong default value for `workDir`
+
 __1.0.0 (03-mar-2025)__
 
 - initial version
