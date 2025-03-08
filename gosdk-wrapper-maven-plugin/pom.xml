@@ -25,8 +25,49 @@
     <profiles>
         <profile>
             <id>publish</id>
+            <properties>
+                <mojo.site.dir>${project.basedir}/../mojo-doc-site</mojo.site.dir>
+            </properties>
+            <reporting>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-plugin-report-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </reporting>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>delete-project-site</id>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <phase>clean</phase>
+                                <configuration>
+                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                                    <failOnError>true</failOnError>
+                                    <filesets>
+                                        <fileset>
+                                            <directory>${mojo.site.dir}</directory>
+                                        </fileset>
+                                    </filesets>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jxr-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-site-plugin</artifactId>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
@@ -104,7 +145,22 @@
                             </execution>
                         </executions>
                     </plugin>
-
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-site-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>generate-project-site</id>
+                                <goals>
+                                    <goal>site</goal>
+                                </goals>
+                                <phase>verify</phase>
+                                <configuration>
+                                    <outputDirectory>${mojo.site.dir}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
