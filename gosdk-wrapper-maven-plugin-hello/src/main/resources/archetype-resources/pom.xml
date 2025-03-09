@@ -1,0 +1,254 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>${version}</version>
+    <packaging>jar</packaging>
+
+    <name>Hello GoLang SDK wrapper</name>
+    <description>Simple 'Hello World!' gosdk-wrapper-maven-plugin example</description>
+    <url>https://github.com/raydac/gosdk-wrapper-maven-plugin</url>
+
+    <properties>
+        <gosdk.version>${gosdk}</gosdk.version>
+        <gosdk.wrapper.plugin.version>${gosdkwrapper}</gosdk.wrapper.plugin.version>
+
+        <go.target.temp.folder>${project.basedir}/.build</go.target.temp.folder>
+        <go.target.folder>${project.basedir}/build</go.target.folder>
+        <go.source.folder>${project.basedir}/src</go.source.folder>
+        <go.resource.folder>${project.basedir}/res</go.resource.folder>
+        <go.path.folder>${project.basedir}/.gopath</go.path.folder>
+        <go.gobin.folder>${project.basedir}/.bin</go.gobin.folder>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <final.extension></final.extension>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>windows-profile</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <final.extension>.exe</final.extension>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <defaultGoal>clean package</defaultGoal>
+        <finalName>${project.artifactId}${final.extension}</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>com.igormaznitsa</groupId>
+                <artifactId>gosdk-wrapper-maven-plugin</artifactId>
+                <version>${gosdk.wrapper.plugin.version}</version>
+                <configuration>
+                    <goVersion>${gosdk.version}</goVersion>
+                    <workDir>${go.target.temp.folder}</workDir>
+                    <env>
+                        <GOBIN>${go.gobin.folder}</GOBIN>
+                        <GOPATH>${go.path.folder}</GOPATH>
+                    </env>
+                    <envLast>
+                        <PATH>${path.separator}${go.target.temp.folder}</PATH>
+                    </envLast>
+                </configuration>
+                <executions>
+                    <!-- Remove temporary and work folders -->
+                    <execution>
+                        <id>remove-go-temp-build-folder</id>
+                        <goals>
+                            <goal>delete-folders</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <forceDelete>true</forceDelete>
+                            <folders>
+                                <folder>${go.target.temp.folder}</folder>
+                            </folders>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>remove-go-build-folders</id>
+                        <goals>
+                            <goal>delete-folders</goal>
+                        </goals>
+                        <configuration>
+                            <forceDelete>true</forceDelete>
+                            <folders>
+                                <folder>${go.gobin.folder}</folder>
+                                <folder>${go.target.temp.folder}</folder>
+                                <folder>${go.path.folder}</folder>
+                                <folder>${go.target.folder}</folder>
+                            </folders>
+                        </configuration>
+                    </execution>
+
+                    <!-- Test the project -->
+                    <execution>
+                        <id>gosdk-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>test</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+
+                    <!-- Build the project -->
+                    <execution>
+                        <id>gosdk-build</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>build</arg>
+                                <arg>-o</arg>
+                                <arg>${go.target.folder}/${project.build.finalName}</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- make temp common folder with sources and resources -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-resources</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>default-testResources</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>copy-resources-to-temp-build</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <outputDirectory>${go.target.temp.folder}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${go.resource.folder}</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                                <resource>
+                                    <directory>${go.source.folder}</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- disable default maven plugin calls -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-clean</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-install</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.4.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.4.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>3.1.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

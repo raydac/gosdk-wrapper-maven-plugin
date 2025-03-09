@@ -59,6 +59,7 @@
 
     <modules>
         <module>gosdk-wrapper-maven-plugin</module>
+        <module>gosdk-wrapper-maven-plugin-hello</module>
     </modules>
 
     <profiles>

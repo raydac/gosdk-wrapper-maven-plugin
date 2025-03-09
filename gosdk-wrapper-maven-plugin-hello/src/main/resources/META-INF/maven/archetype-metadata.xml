@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archetype-descriptor
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0"
+        xsi:schemaLocation="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0 https://maven.apache.org/xsd/archetype-descriptor-1.1.0.xsd"
+
+        name="gosdk-wrapper-maven-plugin-hello"
+        partial="false">
+
+    <requiredProperties>
+        <requiredProperty key="groupId">
+            <defaultValue>com.igormaznitsa.golang</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="artifactId">
+            <defaultValue>gosdk-hello-example</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="version">
+            <defaultValue>1.0.0-SNAPSHOT</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="package">
+            <defaultValue>main</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="gosdkwrapper">
+            <defaultValue>1.0.1-SNAPSHOT</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="gosdk">
+            <defaultValue>1.24.0</defaultValue>
+        </requiredProperty>
+    </requiredProperties>
+
+    <fileSets>
+        <fileSet filtered="true" encoding="UTF-8" packaged="false">
+            <directory/>
+            <includes>
+                <include>**/*.*</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+
+</archetype-descriptor>
