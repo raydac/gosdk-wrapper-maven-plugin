@@ -9,8 +9,9 @@
 
 # Changelog
 
-__1.0.1 (SNAPSHOT)__
+__1.0.1 (12-mar-2025)__
 
+- fixed stuck [#1](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/1)
 - added flag `hideLoadIndicator` to hide GoSDK loading bar from log
 - fixed wrong default value for `workDir`
 
@@ -50,7 +51,7 @@ Let's take a look at the call go to print its help. Just add the plugin into the
 <plugin>
     <groupId>com.igormaznitsa</groupId>
     <artifactId>gosdk-wrapper-maven-plugin</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <configuration>
         <goVersion>1.24.0</goVersion>
     </configuration>
