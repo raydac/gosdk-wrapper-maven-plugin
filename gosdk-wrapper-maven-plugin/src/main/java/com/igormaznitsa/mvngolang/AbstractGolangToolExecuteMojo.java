@@ -300,16 +300,18 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
 
   private void catchStream(final InputStream inputStream,
                            final Consumer<String> lineConsumer) {
-    try (final BufferedReader reader = new BufferedReader(
-        new InputStreamReader(inputStream,
-            Charset.defaultCharset()))) {
-      String line;
-      while ((line = reader.readLine()) != null) {
-        lineConsumer.accept(line);
+    new Thread(() -> { // It is important to do this async as on some occasions processes might block until the input is read
+      try (final BufferedReader reader = new BufferedReader(
+              new InputStreamReader(inputStream,
+                      Charset.defaultCharset()))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          lineConsumer.accept(line);
+        }
+      } catch (IOException ex) {
+        this.logError("IOException during input stream read: " + ex.getMessage());
       }
-    } catch (IOException ex) {
-      this.logError("IOException during input stream read: " + ex.getMessage());
-    }
+    }).start();
   }
 
   @Nullable
