@@ -246,9 +246,9 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       this.logInfo("Hide process output");
     }
 
-    this.catchStream(process.getErrorStream(), line -> {
+    this.catchStream("thread-process-stderr", process.getErrorStream(), line -> {
       if (!this.hideProcessOutput) {
-        this.logInfo(">ERR: " + line);
+        this.logInfo(">stderr: " + line);
       }
       if (targetOutputFile != null) {
         try {
@@ -259,9 +259,9 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
         }
       }
     });
-    this.catchStream(process.getInputStream(), line -> {
+    this.catchStream("thread-process-stdout", process.getInputStream(), line -> {
       if (!this.hideProcessOutput) {
-        this.logError(">STD: " + line);
+        this.logError(">stdout: " + line);
       }
       if (targetErrorFile != null) {
         try {
@@ -298,20 +298,29 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     }
   }
 
-  private void catchStream(final InputStream inputStream,
-                           final Consumer<String> lineConsumer) {
-    new Thread(() -> { // It is important to do this async as on some occasions processes might block until the input is read
+  private void catchStream(
+      final String threadId,
+      final InputStream inputStream,
+      final Consumer<String> lineConsumer
+  ) {
+    // It is important to do this async as on some occasions processes might block until the input is read
+    final Thread thread = new Thread(() -> {
+      this.logDebug("Start catchStream thread " + threadId);
       try (final BufferedReader reader = new BufferedReader(
-              new InputStreamReader(inputStream,
-                      Charset.defaultCharset()))) {
+          new InputStreamReader(inputStream,
+              Charset.defaultCharset()))) {
         String line;
         while ((line = reader.readLine()) != null) {
           lineConsumer.accept(line);
         }
       } catch (IOException ex) {
-        this.logError("IOException during input stream read: " + ex.getMessage());
+        this.logError(
+            '(' + threadId + ") IOException during input stream read: " + ex.getMessage());
+      } finally {
+        this.logDebug("Completed catchStream thread " + threadId);
       }
-    }).start();
+    }, threadId);
+    thread.start();
   }
 
   @Nullable
