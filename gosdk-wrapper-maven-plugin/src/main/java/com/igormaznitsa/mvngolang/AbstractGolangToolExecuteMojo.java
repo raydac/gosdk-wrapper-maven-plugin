@@ -248,7 +248,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
 
     this.catchStream(process.getErrorStream(), line -> {
       if (!this.hideProcessOutput) {
-        this.logInfo(">STD: " + line);
+        this.logInfo(">ERR: " + line);
       }
       if (targetOutputFile != null) {
         try {
@@ -261,7 +261,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     });
     this.catchStream(process.getInputStream(), line -> {
       if (!this.hideProcessOutput) {
-        this.logError(">ERR: " + line);
+        this.logError(">STD: " + line);
       }
       if (targetErrorFile != null) {
         try {
