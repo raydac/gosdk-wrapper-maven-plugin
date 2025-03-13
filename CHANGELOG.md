@@ -2,7 +2,7 @@
 
     - improved debug logging
     - disabled mass tracing log messages from Apache Http 5 Client
-    - fixed wrong log file destination
+    - fixed wrong std output log file destination
 
 # 1.0.1 (12-mar-2025)
 

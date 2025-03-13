@@ -11,19 +11,19 @@
 
 __1.0.2 (SNAPSHOT)__
 
-- improved debug logging
-- disabled mass tracing log messages from Apache Http 5 Client
-- fixed wrong log file destination
+    - improved debug logging
+    - disabled mass tracing log messages from Apache Http 5 Client
+    - fixed wrong std output log file destination
 
 __1.0.1 (12-mar-2025)__
 
-- fixed stuck [#1](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/1)
-- added flag `hideLoadIndicator` to hide GoSDK loading bar from log
-- fixed wrong default value for `workDir`
+    - fixed stuck [#1](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/1)
+    - added flag `hideLoadIndicator` to hide GoSDK loading bar from log
+    - fixed wrong default value for `workDir`
 
 __1.0.0 (03-mar-2025)__
 
-- initial version
+    - initial version
 
 [full changelog](https://github.com/raydac/gosdk-wrapper-maven-plugin/blob/master/CHANGELOG.md)
 
