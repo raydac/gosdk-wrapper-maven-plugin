@@ -26,7 +26,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwareMojo {
 
   /**
-   * Work directory.
+   * Work directory. This directory will be the work one for executed process.
    *
    * @since 1.0.0
    */
@@ -34,7 +34,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private String workDir;
 
   /**
-   * List of environment variable to be removed.
+   * List of environment variable to be removed. All listed variables will be removed from environment of executing process.
    *
    * @since 1.0.0
    */
@@ -42,7 +42,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private List<String> envRemove;
 
   /**
-   * List of environment variable values to be added or replaced.
+   * List of environment variable values to be added or replaced. All variable values will be added or replacing existing ones in environment of started process.
    *
    * @since 1.0.0
    */
@@ -66,7 +66,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private Map<String, String> envLast;
 
   /**
-   * Timeout for started process. If 0 then no timeout.
+   * Timeout for started process in milliseconds. If 0 or negative then no timeout.
    *
    * @since 1.0.0
    */
@@ -74,7 +74,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private long processTimeout;
 
   /**
-   * List of execute command line arguments.
+   * List of command line arguments for execute command.
    *
    * @since 1.0.0
    */
@@ -98,7 +98,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private String logFileErr;
 
   /**
-   * Expected exit status for started process.
+   * Expected exit status for started process. If unexpected exit status then execution failed.
    *
    * @since 1.0.0
    */
@@ -106,7 +106,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private int expectedExitCode;
 
   /**
-   * Hide process output in maven log. File logs continue work.
+   * Hide process output in maven log. File log continues work. Just disabling output into maven log.
    *
    * @since 1.0.0
    */
@@ -288,7 +288,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
 
     final int exitCode;
     try {
-      if (this.processTimeout == 0L) {
+      if (this.processTimeout <= 0L) {
         exitCode = process.waitFor();
       } else {
         final boolean result = process.waitFor(this.processTimeout, TimeUnit.MILLISECONDS);
