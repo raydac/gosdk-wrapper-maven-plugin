@@ -1,5 +1,8 @@
 package com.igormaznitsa.mvngolang;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElse;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,8 +12,6 @@ import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
-import static java.util.Objects.requireNonNull;
-import static java.util.Objects.requireNonNullElse;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.LongFunction;
@@ -50,6 +51,10 @@ import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.ssl.SSLContexts;
 
 public class ApacheHttpClient5Loader {
+  static {
+    // disable mass logging from http client if debug mode
+    System.setProperty("org.slf4j.simpleLogger.log.org.apache.hc.client5.http.wire", "off");
+  }
 
   public static final ApacheHttpClient5Loader INSTANCE = new ApacheHttpClient5Loader();
 
