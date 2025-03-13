@@ -59,7 +59,7 @@ Let's take a look at the call go to print its help. Just add the plugin into the
     <artifactId>gosdk-wrapper-maven-plugin</artifactId>
     <version>1.0.1</version>
     <configuration>
-        <goVersion>1.24.0</goVersion>
+        <goVersion>1.24.1</goVersion>
     </configuration>
     <executions>
         <execution>
