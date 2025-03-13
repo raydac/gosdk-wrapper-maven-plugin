@@ -1,5 +1,7 @@
 package com.igormaznitsa.mvngolang;
 
+import static java.lang.System.lineSeparator;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
@@ -182,7 +185,17 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       });
     }
 
-    processBuilder.environment().forEach((k, v) -> this.logDebug("Environment: " + k + "=" + v));
+    final String environmentInfo = "Process environment" +
+        lineSeparator() + "--------------------------" + lineSeparator() +
+        processBuilder.environment().entrySet().stream()
+            .map(x -> String.format("\t%s=%s", x.getKey(), x.getValue()))
+            .collect(Collectors.joining(lineSeparator())) +
+        lineSeparator() + "--------------------------";
+    if (this.verbose) {
+      this.logInfo(environmentInfo);
+    } else {
+      this.logDebug(environmentInfo);
+    }
 
     final File workDirectory = new File(this.workDir);
     if (!workDirectory.isDirectory()) {
@@ -248,27 +261,27 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
 
     this.catchStream("thread-process-stderr", process.getErrorStream(), line -> {
       if (!this.hideProcessOutput) {
-        this.logInfo(">stderr: " + line);
+        this.logWarn(">stderr: " + line);
       }
-      if (targetOutputFile != null) {
+      if (targetErrorFile != null) {
         try {
-          FileUtils.write(targetOutputFile, line + System.lineSeparator(),
+          FileUtils.write(targetErrorFile, line + lineSeparator(),
               Charset.defaultCharset(), true);
         } catch (IOException ex) {
-          this.logError("Can't append record to log output file: " + ex.getMessage());
+          this.logError("Can't append record to log stderr file: " + ex.getMessage());
         }
       }
     });
     this.catchStream("thread-process-stdout", process.getInputStream(), line -> {
       if (!this.hideProcessOutput) {
-        this.logError(">stdout: " + line);
+        this.logInfo(">stdout: " + line);
       }
-      if (targetErrorFile != null) {
+      if (targetOutputFile != null) {
         try {
-          FileUtils.write(targetErrorFile, line + System.lineSeparator(),
+          FileUtils.write(targetOutputFile, line + lineSeparator(),
               Charset.defaultCharset(), true);
         } catch (IOException ex) {
-          this.logError("Can't append record to log err file: " + ex.getMessage());
+          this.logError("Can't append record to log stdout file: " + ex.getMessage());
         }
       }
     });
