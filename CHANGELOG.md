@@ -1,3 +1,9 @@
+# 1.0.2 (SNAPSHOT)
+
+    - improved debug logging
+    - disabled mass tracing log messages from Apache Http 5 Client
+    - fixed wrong log file destination
+
 # 1.0.1 (12-mar-2025)
 
     - fixed stuck [#1](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/1)
