@@ -450,14 +450,14 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
             @Override
             public void onArchiveEntry(ArchiveUnpacker source, ArchiveEntry archiveEntry) {
-              logDebug("Archive entry: " + archiveEntry.getName() + " (" +
+              logTrace("Archive entry: " + archiveEntry.getName() + " (" +
                   (archiveEntry.isDirectory() ? "" : archiveEntry.getSize()) + ')');
               counter.incrementAndGet();
             }
 
             @Override
             public void onCompleted(ArchiveUnpacker source) {
-              logDebug("Completed decompressing");
+              logDebug("Decompression has been completed: " + counter.get() + " item(s)");
             }
           });
       this.logInfo(
@@ -604,7 +604,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
             try {
               Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(x);
               if (!permissions.contains(PosixFilePermission.OWNER_EXECUTE)) {
-                this.logDebug("Setting executable flag for file: " + x);
+                this.logTrace("Set executable flag for file: " + x);
                 permissions = new HashSet<>(permissions);
                 permissions.add(PosixFilePermission.OWNER_EXECUTE);
               }

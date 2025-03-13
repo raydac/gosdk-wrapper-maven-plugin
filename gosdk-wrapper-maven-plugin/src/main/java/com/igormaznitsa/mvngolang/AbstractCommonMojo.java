@@ -26,11 +26,25 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
   @Parameter(property = "mvn.golang.verbose", name = "verbose", defaultValue = "false")
   protected boolean verbose;
 
+  /**
+   * Enable tracing messages into debug log ,active only if debug mode activated.
+   *
+   * @since 1.0.2
+   */
+  @Parameter(property = "mvn.golang.trace", name = "trace", defaultValue = "false")
+  protected boolean trace;
+
   protected static boolean isNullOrEmpty(final String text) {
     return text == null || text.isBlank();
   }
 
   protected abstract boolean isSkip();
+
+  protected void logTrace(final String text) {
+    if (text != null && this.trace && this.getLog().isDebugEnabled()) {
+      this.getLog().debug(text);
+    }
+  }
 
   protected void logDebug(final String text) {
     if (text != null && this.getLog().isDebugEnabled()) {

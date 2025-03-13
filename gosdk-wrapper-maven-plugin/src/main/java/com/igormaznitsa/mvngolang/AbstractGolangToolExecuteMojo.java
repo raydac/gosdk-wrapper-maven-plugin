@@ -185,7 +185,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       });
     }
 
-    final String environmentInfo = "Process environment" +
+    final String environmentInfo = "Prepared process builder environment" +
         lineSeparator() + "--------------------------" + lineSeparator() +
         processBuilder.environment().entrySet().stream()
             .map(x -> String.format("\t%s=%s", x.getKey(), x.getValue()))
