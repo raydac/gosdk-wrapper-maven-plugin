@@ -618,18 +618,29 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
   private void makeExecutableFilesInFolder(final Path folder) throws IOException {
     try (Stream<Path> walker = Files.walk(folder)) {
-      walker.filter(x -> Files.isRegularFile(x) && !Files.isSymbolicLink(x))
-          .forEach(x -> {
+      walker.filter(
+          path -> Files.isRegularFile(path)
+              && !Files.isSymbolicLink(path)
+              && !Files.isExecutable(path)
+      ).forEach(path -> {
             try {
-              Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(x);
+              Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path);
               if (!permissions.contains(PosixFilePermission.OWNER_EXECUTE)) {
-                this.logTrace("Set executable flag for file: " + x);
+                this.logTrace("Set executable flag for file: " + path);
                 permissions = new HashSet<>(permissions);
                 permissions.add(PosixFilePermission.OWNER_EXECUTE);
               }
-              Files.setPosixFilePermissions(x, permissions);
+              Files.setPosixFilePermissions(path, permissions);
+            } catch (UnsupportedOperationException ex) {
+              final File targetFile = path.toFile();
+              if (targetFile.setExecutable(true, true)) {
+                this.logTrace("Set executable flag for file through setExecutable: " + targetFile);
+              } else {
+                this.logTrace(
+                    "(!)Cant set executable flag for file through setExecutable: " + targetFile);
+              }
             } catch (IOException ex) {
-              logError("Can't set execute permission for unpacked file: " + x);
+              logError("Can't set execute permission for unpacked file: " + path);
             }
           });
     }
