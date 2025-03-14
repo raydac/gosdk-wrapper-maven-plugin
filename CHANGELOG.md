@@ -1,5 +1,7 @@
 # 1.0.2 (SNAPSHOT)
 
+    - added `give-all-permissions` mojo
+    - fixed exception under Windows (#3)
     - improved debug logging
     - disabled mass tracing log messages from Apache Http 5 Client
     - fixed wrong std output log file destination
