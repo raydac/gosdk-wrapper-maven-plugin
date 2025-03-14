@@ -39,7 +39,6 @@ public final class FileUtils {
       dosView.setReadOnly(false);
       dosView.setArchive(false);
       dosView.setSystem(false);
-      dosView.setHidden(false);
     }
     quietSetAllPosixPermission(path);
   }
