@@ -81,16 +81,16 @@ public class GolangDeleteFoldersMojo extends AbstractFileProcessingMojo {
                 if (this.forceDelete) {
                   this.logOptional("Making folder content writable: " + path);
                   try {
-                    makeWritable(path, this.followSymLinks);
+                    makeWritable(path, this.isFollowSymLinks());
                   } catch (IOException ex) {
                     throw new UncheckedIOException(ex.getMessage(), ex);
                   }
                   PathUtils.deleteDirectory(path,
-                      this.followSymLinks ? LINK_OPTIONS_EMPTY : LINK_OPTIONS_NO_FOLLOW_LINKS,
+                      this.isFollowSymLinks() ? LINK_OPTIONS_EMPTY : LINK_OPTIONS_NO_FOLLOW_LINKS,
                       StandardDeleteOption.OVERRIDE_READ_ONLY);
                 } else {
                   PathUtils.deleteDirectory(path,
-                      this.followSymLinks ? LINK_OPTIONS_EMPTY :
+                      this.isFollowSymLinks() ? LINK_OPTIONS_EMPTY :
                           LINK_OPTIONS_NO_FOLLOW_LINKS);
                 }
                 this.logInfo("Successfully deleted folder: " + path);
