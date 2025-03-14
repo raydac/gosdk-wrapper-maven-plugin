@@ -58,66 +58,77 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   private static final long LOCK_FILE_SLEEP_MS = 100;
   /**
    * Section describing proxy settings.
+   *
    * @since 1.0.0
    */
   @Parameter(name = "proxy")
   private ProxySettings proxy;
   /**
    * Disable SSL certificate check during HTTP requests.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.disable.ssl.check", name = "disableSslCheck", defaultValue = "false")
   private boolean disableSslCheck;
   /**
    * Hide SDK loading indicator.
+   *
    * @since 1.0.1
    */
   @Parameter(property = "mvn.golang.hide.load.indicator", name = "hideLoadIndicator", defaultValue = "false")
   private boolean hideLoadIndicator;
   /**
    * The site contains GoSDK archives.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.sdk.site", name = "sdkSite", defaultValue = "https://storage.googleapis.com/golang/")
   private String sdkSite;
   /**
    * Allows to define base SDK archive base name.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.sdk.archive.base.name", name = "sdkArchiveBaseName")
   private String sdkArchiveBaseName;
   /**
    * Folder caching downloaded and unpacked GoSDKs.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.store.folder", defaultValue = "${user.home}${file.separator}.mvnGoLang", name = "storeFolder")
   private String storeFolder;
   /**
    * Folder to download SDK archives.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.download.archive.folder", name = "downloadArchiveFolder")
   private String downloadArchiveFolder;
   /**
    * MD5 to check downloaded archive file.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.expected.archive.md5", name = "expectedArchiveMd5")
   private String expectedArchiveMd5;
   /**
    * If true then downloaded GoSDK archive will not be removed after processing.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.keep.downloaded.archive", name = "keepDownloadedArchive", defaultValue = "false")
   private boolean keepDownloadedArchive;
   /**
    * Force use of existing pre-installed Go folder.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.preinstalled.sdk.folder", name = "preinstalledSdkFolder")
   private String preinstalledSdkFolder;
   /**
    * Force direct URL to load GoSDK archive.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.sdk.download.url", name = "sdkDownloadUrl")
@@ -125,24 +136,28 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
   /**
    * GoSDK version.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.go.version", name = "goVersion", defaultValue = "1.24.1")
   private String goVersion;
   /**
    * GoSDK OS.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.os", name = "os")
   private String os;
   /**
    * GoSDK architecture.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.arch", name = "arch")
   private String arch;
   /**
    * Optional suffix for OSX.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.osx.version", name = "osxVersion")
@@ -150,24 +165,28 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
   /**
    * Force GoSDK archive file name.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.sdk.archive.file.name", name = "sdkArchiveFileName")
   private String sdkArchiveFileName;
   /**
    * Connection timeout for HTTP connections.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.connection.timeout.ms", name = "connectionTimeout", defaultValue = "60000")
-  private int connectionTimeout = 60000;
+  private long connectionTimeout = 60_000L;
   /**
    * Force use maven proxy settings.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.use.maven.proxy", name = "useMavenProxy", defaultValue = "true")
   private boolean useMavenProxy;
   /**
    * Guess GoSDK archive file extension based on host os.
+   *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.sdk.archive.file.auto.extension", name = "sdkArchiveFileAutoExtension", defaultValue = "true")
