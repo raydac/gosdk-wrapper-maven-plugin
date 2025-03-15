@@ -739,8 +739,16 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
   }
 
+  private static final Duration DELAY_LOCK_FILE_NOTIFICATION = Duration.ofMillis(10_000);
+
   private void unlockSdkFolder(final File lockFile) throws IOException {
+    long nextNotificationTime =
+        System.currentTimeMillis() + DELAY_LOCK_FILE_NOTIFICATION.toMillis();
     while (lockFile.exists() && !lockFile.delete()) {
+      if (System.currentTimeMillis() >= nextNotificationTime) {
+        this.logWarn("Still can't unlock folder and remove file: " + lockFile);
+        nextNotificationTime = System.currentTimeMillis() + DELAY_LOCK_FILE_NOTIFICATION.toMillis();
+      }
       try {
         sleep(LOCK_FILE_SLEEP_MS);
       } catch (InterruptedException ex) {
@@ -755,7 +763,14 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     final File lockFile = new File(sdkCacheFolder, ".lock." + baseSdkName);
     lockFile.deleteOnExit();
     if (!lockFile.createNewFile()) {
+      long nextNotificationTime =
+          System.currentTimeMillis() + DELAY_LOCK_FILE_NOTIFICATION.toMillis();
       while (lockFile.exists()) {
+        if (System.currentTimeMillis() >= nextNotificationTime) {
+          this.logWarn("Waiting for lock file: " + lockFile);
+          nextNotificationTime =
+              System.currentTimeMillis() + DELAY_LOCK_FILE_NOTIFICATION.toMillis();
+        }
         try {
           sleep(LOCK_FILE_SLEEP_MS);
         } catch (InterruptedException ex) {

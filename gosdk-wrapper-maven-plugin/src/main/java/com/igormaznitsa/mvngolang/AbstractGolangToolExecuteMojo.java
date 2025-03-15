@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -131,7 +132,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   protected void onMojoExecute(final Path goSdkFolder)
       throws IOException, MojoExecutionException, MojoFailureException {
 
-    final List<String> cliListd = new ArrayList<>();
+    final List<String> cliList = new ArrayList<>();
 
     final Path executable = this.findCommand(goSdkFolder, Path.of(System.getProperty("java.home")));
 
@@ -145,14 +146,14 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       throw new MojoExecutionException("Provided file is not executable: " + executable);
     }
 
-    cliListd.add(executable.toString());
+    cliList.add(executable.toString());
     if (args != null) {
-      cliListd.addAll(args);
+      cliList.addAll(args);
     }
 
-    this.logInfo("Prepared command line arguments: " + cliListd);
+    this.logInfo("Prepared command line arguments: " + cliList);
 
-    final ProcessBuilder processBuilder = new ProcessBuilder(cliListd);
+    final ProcessBuilder processBuilder = new ProcessBuilder(cliList);
 
     if (this.envRemove != null) {
       this.envRemove.forEach(x -> processBuilder.environment().remove(x));
@@ -204,7 +205,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     processBuilder.directory(workDirectory);
     this.logOptional("Work directory: " + workDir);
 
-    processBuilder.redirectErrorStream(false);
+    processBuilder.redirectErrorStream(true);
 
     final File targetOutputFile;
     final File targetErrorFile;
@@ -225,10 +226,46 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       this.logInfo("Redirect process standard output to: " + targetOutputFile);
     }
 
+    final String localId = Long.toHexString(System.nanoTime()).toUpperCase(Locale.ENGLISH);
+
+    final Thread threadStdErr;
+    final Thread threadStdOut;
     final Process process;
     try {
       this.logInfo("Starting command");
       process = processBuilder.start();
+      threadStdErr =
+          this.prepareCatchStream("thread-process-stderr-" + localId, process.getErrorStream(),
+              line -> {
+                if (!this.hideProcessOutput) {
+                  this.logWarn(">stderr: " + line);
+                }
+                if (targetErrorFile != null) {
+                  try {
+                    FileUtils.write(targetErrorFile, line + lineSeparator(),
+                        Charset.defaultCharset(), true);
+                  } catch (IOException ex) {
+                    this.logError("Can't append record to log stderr file: " + ex.getMessage());
+                  }
+                }
+              });
+      threadStdOut =
+          this.prepareCatchStream("thread-process-stdout-" + localId, process.getInputStream(),
+              line -> {
+                if (!this.hideProcessOutput) {
+                  this.logInfo(">stdout: " + line);
+                }
+                if (targetOutputFile != null) {
+                  try {
+                    FileUtils.write(targetOutputFile, line + lineSeparator(),
+                        Charset.defaultCharset(), true);
+                  } catch (IOException ex) {
+                    this.logError("Can't append record to log stdout file: " + ex.getMessage());
+                  }
+                }
+              });
+      threadStdErr.start();
+      threadStdOut.start();
       Thread.yield();
 
       Long pid = null;
@@ -259,36 +296,10 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       this.logInfo("Hide process output");
     }
 
-    this.catchStream("thread-process-stderr", process.getErrorStream(), line -> {
-      if (!this.hideProcessOutput) {
-        this.logWarn(">stderr: " + line);
-      }
-      if (targetErrorFile != null) {
-        try {
-          FileUtils.write(targetErrorFile, line + lineSeparator(),
-              Charset.defaultCharset(), true);
-        } catch (IOException ex) {
-          this.logError("Can't append record to log stderr file: " + ex.getMessage());
-        }
-      }
-    });
-    this.catchStream("thread-process-stdout", process.getInputStream(), line -> {
-      if (!this.hideProcessOutput) {
-        this.logInfo(">stdout: " + line);
-      }
-      if (targetOutputFile != null) {
-        try {
-          FileUtils.write(targetOutputFile, line + lineSeparator(),
-              Charset.defaultCharset(), true);
-        } catch (IOException ex) {
-          this.logError("Can't append record to log stdout file: " + ex.getMessage());
-        }
-      }
-    });
-
     final int exitCode;
     try {
       if (this.processTimeout <= 0L) {
+        this.logDebug("Waiting process, localId=" + localId);
         exitCode = process.waitFor();
       } else {
         final boolean result = process.waitFor(this.processTimeout, TimeUnit.MILLISECONDS);
@@ -304,6 +315,9 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       this.logWarn("Process interrupted");
       Thread.currentThread().interrupt();
       return;
+    } finally {
+      threadStdOut.interrupt();
+      threadStdErr.interrupt();
     }
 
     if (exitCode != this.expectedExitCode) {
@@ -311,20 +325,31 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     }
   }
 
-  private void catchStream(
+  private Thread prepareCatchStream(
       final String threadId,
       final InputStream inputStream,
       final Consumer<String> lineConsumer
   ) {
-    // It is important to do this async as on some occasions processes might block until the input is read
     final Thread thread = new Thread(() -> {
       this.logDebug("Start catchStream thread " + threadId);
       try (final BufferedReader reader = new BufferedReader(
           new InputStreamReader(inputStream,
               Charset.defaultCharset()))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-          lineConsumer.accept(line);
+        final StringBuilder buffer = new StringBuilder();
+        while (!Thread.currentThread().isInterrupted()) {
+          final int nextChar = reader.read();
+          if (nextChar < 0) {
+            break;
+          }
+          if (nextChar == '\n') {
+            lineConsumer.accept(buffer.toString());
+            buffer.setLength(0);
+          } else if (!Character.isISOControl(nextChar)) {
+            buffer.append((char) nextChar);
+          }
+        }
+        if (buffer.length() > 0) {
+          lineConsumer.accept(buffer.toString());
         }
       } catch (IOException ex) {
         this.logError(
@@ -333,7 +358,8 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
         this.logDebug("Completed catchStream thread " + threadId);
       }
     }, threadId);
-    thread.start();
+    thread.setDaemon(true);
+    return thread;
   }
 
   @Nullable
