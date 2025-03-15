@@ -344,7 +344,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
           if (nextChar == '\n') {
             lineConsumer.accept(buffer.toString());
             buffer.setLength(0);
-          } else if (!Character.isISOControl(nextChar)) {
+          } else {
             buffer.append((char) nextChar);
           }
         }
