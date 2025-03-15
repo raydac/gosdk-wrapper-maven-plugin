@@ -2,16 +2,37 @@ package com.igormaznitsa.mvngolang;
 
 import static java.util.Objects.requireNonNull;
 
-import javax.annotation.Nonnull;
 import org.apache.hc.core5.http.HttpHost;
 
+/**
+ * Container keeps Proxy parameters.
+ *
+ * @since 1.0.0
+ */
 public class ProxySettings {
-
+  /**
+   * Proxy host address, for instance 127.0.0.1
+   */
   public String host = "127.0.0.1";
+  /**
+   * Proxy server scheme, for instance http
+   */
   public String scheme = "http";
+  /**
+   * Proxy server port, for instance 80
+   */
   public int port = 80;
+  /**
+   * Optional username.
+   */
   public String username;
+  /**
+   * Optional password
+   */
   public String password = "";
+  /**
+   * Optional list of non-proxy hosts separated by vertical bar.
+   */
   public String nonProxyHosts;
 
   public ProxySettings(
@@ -39,8 +60,14 @@ public class ProxySettings {
   }
 
   @Override
-  @Nonnull
   public String toString() {
-    return this.scheme + "://" + this.host + ":" + this.port;
+    return "ProxySettings{" +
+        "host='" + host + '\'' +
+        ", scheme='" + scheme + '\'' +
+        ", port=" + port +
+        ", username='" + username + '\'' +
+        ", password='" + password + '\'' +
+        ", nonProxyHosts='" + nonProxyHosts + '\'' +
+        '}';
   }
 }

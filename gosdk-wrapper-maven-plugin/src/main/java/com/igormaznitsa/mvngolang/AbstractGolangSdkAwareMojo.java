@@ -570,6 +570,11 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   }
 
   private HttpClient makeHttpClient() {
+    final ProxySettings proxySettings = this.findProxySettings();
+    this.logDebug("Proxy settings: " + proxySettings);
+    this.logDebug("Disable SSL check: " + this.disableSslCheck);
+    this.logDebug("Connection timeout: " + this.connectionTimeout);
+
     return ApacheHttpClient5Loader.INSTANCE.createHttpClient(
         this.findProxySettings(),
         this.disableSslCheck,
@@ -787,8 +792,10 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     if (this.useMavenProxy) {
       final Proxy activeMavenProxy = this.settings == null ? null : this.settings.getActiveProxy();
       if (activeMavenProxy == null) {
+        this.logDebug("No maven proxy settings");
         result = null;
       } else {
+        this.logDebug("Using maven proxy settings");
         result = new ProxySettings(
             activeMavenProxy.getProtocol(),
             activeMavenProxy.getHost(),
