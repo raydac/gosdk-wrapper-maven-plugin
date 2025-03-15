@@ -1,4 +1,4 @@
-package com.igormaznitsa.mvngolang;
+package com.igormaznitsa.mvngolang.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

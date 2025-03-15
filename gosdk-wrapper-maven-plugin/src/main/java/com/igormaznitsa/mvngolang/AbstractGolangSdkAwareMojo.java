@@ -5,6 +5,9 @@ import static java.lang.Math.min;
 import static java.lang.System.out;
 import static java.lang.Thread.sleep;
 
+import com.igormaznitsa.mvngolang.utils.ApacheHttpClient5Loader;
+import com.igormaznitsa.mvngolang.utils.ArchiveUnpacker;
+import com.igormaznitsa.mvngolang.utils.ProxySettings;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

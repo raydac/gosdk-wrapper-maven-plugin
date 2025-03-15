@@ -1,4 +1,4 @@
-package com.igormaznitsa.mvngolang;
+package com.igormaznitsa.mvngolang.utils;
 
 import static java.util.Objects.requireNonNull;
 
