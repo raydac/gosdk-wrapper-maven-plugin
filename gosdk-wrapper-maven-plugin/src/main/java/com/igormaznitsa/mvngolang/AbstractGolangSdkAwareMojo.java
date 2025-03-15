@@ -58,6 +58,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
           "application/x-gzip"
       );
   private static final long LOCK_FILE_SLEEP_MS = 100;
+  private static final Duration DELAY_LOCK_FILE_NOTIFICATION = Duration.ofSeconds(15);
   /**
    * Section describing proxy settings.
    *
@@ -135,7 +136,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.sdk.download.url", name = "sdkDownloadUrl")
   private String sdkDownloadUrl;
-
   /**
    * GoSDK version.
    *
@@ -164,7 +164,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.osx.version", name = "osxVersion")
   private String osxVersion;
-
   /**
    * Force GoSDK archive file name.
    *
@@ -244,6 +243,62 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     out.print(builder);
     out.flush();
     return progress;
+  }
+
+  protected static Optional<Path> findExecutable(final String fileName, final Path folder)
+      throws IOException {
+    if (fileName == null) {
+      throw new NullPointerException("File name is null");
+    }
+    if (folder == null) {
+      throw new NullPointerException("Folder is null");
+    }
+    if (!Files.isDirectory(folder)) {
+      throw new IllegalArgumentException("Is not a folder: " + folder);
+    }
+
+    if (SystemUtils.IS_OS_WINDOWS && fileName.contains(":")) {
+      throw new IllegalArgumentException("Illegal file name: " + fileName);
+    }
+
+    if (fileName.contains("/") || fileName.contains("\\")) {
+      final Path path = folder.resolve(fileName);
+      return Files.isRegularFile(path) ? Optional.of(path) : Optional.empty();
+    }
+
+    final Set<String> variants;
+    if (fileName.contains(".")) {
+      variants = Set.of(fileName);
+    } else {
+      final List<String> possibleExtensions;
+      if (SystemUtils.IS_OS_WINDOWS) {
+        possibleExtensions = List.of(".exe", ".cmd", ".bat");
+      } else {
+        possibleExtensions = List.of(".sh", "");
+      }
+      variants = possibleExtensions.stream()
+          .flatMap(x -> Stream.of(x, x.toUpperCase(Locale.ENGLISH)))
+          .map(x -> fileName + x)
+          .collect(Collectors.toSet());
+    }
+
+    final Path folderBin = folder.resolve("bin");
+    if (Files.isDirectory(folderBin)) {
+      try (Stream<Path> walker = Files.walk(folderBin)) {
+        final Optional<Path> found = walker.filter(
+                x -> Files.isRegularFile(x) && variants.contains(x.getFileName().toString()))
+            .findFirst();
+        if (found.isPresent()) {
+          return found;
+        }
+      }
+    }
+
+    try (Stream<Path> walker = Files.walk(folder)) {
+      return walker.filter(
+              x -> Files.isRegularFile(x) && variants.contains(x.getFileName().toString()))
+          .findFirst();
+    }
   }
 
   private String findSdkBaseName() {
@@ -582,62 +637,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     );
   }
 
-  protected static Optional<Path> findExecutable(final String fileName, final Path folder)
-      throws IOException {
-    if (fileName == null) {
-      throw new NullPointerException("File name is null");
-    }
-    if (folder == null) {
-      throw new NullPointerException("Folder is null");
-    }
-    if (!Files.isDirectory(folder)) {
-      throw new IllegalArgumentException("Is not a folder: " + folder);
-    }
-
-    if (SystemUtils.IS_OS_WINDOWS && fileName.contains(":")) {
-      throw new IllegalArgumentException("Illegal file name: " + fileName);
-    }
-
-    if (fileName.contains("/") || fileName.contains("\\")) {
-      final Path path = folder.resolve(fileName);
-      return Files.isRegularFile(path) ? Optional.of(path) : Optional.empty();
-    }
-
-    final Set<String> variants;
-    if (fileName.contains(".")) {
-      variants = Set.of(fileName);
-    } else {
-      final List<String> possibleExtensions;
-      if (SystemUtils.IS_OS_WINDOWS) {
-        possibleExtensions = List.of(".exe", ".cmd", ".bat");
-      } else {
-        possibleExtensions = List.of(".sh", "");
-      }
-      variants = possibleExtensions.stream()
-          .flatMap(x -> Stream.of(x, x.toUpperCase(Locale.ENGLISH)))
-          .map(x -> fileName + x)
-          .collect(Collectors.toSet());
-    }
-
-    final Path folderBin = folder.resolve("bin");
-    if (Files.isDirectory(folderBin)) {
-      try (Stream<Path> walker = Files.walk(folderBin)) {
-        final Optional<Path> found = walker.filter(
-                x -> Files.isRegularFile(x) && variants.contains(x.getFileName().toString()))
-            .findFirst();
-        if (found.isPresent()) {
-          return found;
-        }
-      }
-    }
-
-    try (Stream<Path> walker = Files.walk(folder)) {
-      return walker.filter(
-              x -> Files.isRegularFile(x) && variants.contains(x.getFileName().toString()))
-          .findFirst();
-    }
-  }
-
   private void makeExecutableFilesInFolder(final Path folder) throws IOException {
     try (Stream<Path> walker = Files.walk(folder)) {
       walker.filter(
@@ -743,8 +742,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
       throw new IOException("Unexpected IOException", ex);
     }
   }
-
-  private static final Duration DELAY_LOCK_FILE_NOTIFICATION = Duration.ofMillis(10_000);
 
   private void unlockSdkFolder(final File lockFile) throws IOException {
     long nextNotificationTime =
