@@ -13,7 +13,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -386,8 +385,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
                 sourcePath = tempSdkFolder;
               }
               this.logOptional("Moving unpacked folder " + sourcePath + " to " + preparedSdkFolder);
-              preparedSdkFolder =
-                  Files.move(sourcePath, preparedSdkFolder, StandardCopyOption.ATOMIC_MOVE);
+              FileUtils.moveDirectory(sourcePath.toFile(), preparedSdkFolder.toFile());
             } finally {
               if (Files.exists(tempSdkFolder)) {
                 this.logOptional("Deleting temp sdk folder: " + tempSdkFolder);
