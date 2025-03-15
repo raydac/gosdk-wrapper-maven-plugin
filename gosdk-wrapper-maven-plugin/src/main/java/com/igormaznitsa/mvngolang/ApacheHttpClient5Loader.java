@@ -255,7 +255,10 @@ public class ApacheHttpClient5Loader {
       builder.setConnectionManager(this.connectionManagerDefault);
     }
 
-    return builder.build();
+    return builder
+        .setUserAgent("gosdk-wrapper-maven-plugin-agent/1.0.2")
+        .disableCookieManagement()
+        .build();
   }
 
   private static final class WildCardMatcher {

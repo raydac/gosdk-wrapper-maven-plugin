@@ -505,6 +505,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
           this.logDebug("Deleted successfully");
         } else {
           this.logWarn("Can't delete temporary archive file: " + tempArchivePath);
+          tempArchivePath.toFile().deleteOnExit();
         }
       } else {
         this.logWarn("Downloaded archive not removed for direct request: " + tempArchivePath);
