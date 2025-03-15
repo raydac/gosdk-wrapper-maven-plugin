@@ -3,6 +3,7 @@ package com.igormaznitsa.mvngolang;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.System.out;
+import static java.lang.Thread.sleep;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +46,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+@SuppressWarnings("ReassignedVariable")
 public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
   public static final String SDK_NAME_PATTERN = "go%s.%s-%s%s";
@@ -311,7 +313,15 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
           } else {
             final Path tempSdkFolder = preparedSdkFolder.resolveSibling(
                 ".unpack" + preparedSdkFolder.getFileName().toString());
-            this.loadAndUnpackGoSdk(sdkBaseName, tempSdkFolder);
+            long start = System.currentTimeMillis();
+            try {
+              this.loadAndUnpackGoSdk(sdkBaseName, tempSdkFolder);
+            } finally {
+              this.logDebug(
+                  "Elapsed time for loadAndUnpackGoSdk: " + (System.currentTimeMillis() - start) +
+                      " ms");
+            }
+            start = System.currentTimeMillis();
             try {
               final Path goFolder = tempSdkFolder.resolve("go");
               final Path sourcePath;
@@ -328,6 +338,8 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
                 this.logOptional("Deleting temp sdk folder: " + tempSdkFolder);
                 FileUtils.deleteDirectory(tempSdkFolder.toFile());
               }
+              this.logDebug("Elapsed time for all GoSDK unpacking operations: " +
+                  (System.currentTimeMillis() - start) + " ms");
             }
           }
         }
@@ -489,7 +501,11 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     } finally {
       if (!this.keepDownloadedArchive) {
         this.logInfo("Deleting temporary archive file:" + tempArchivePath);
-        Files.deleteIfExists(tempArchivePath);
+        if (Files.deleteIfExists(tempArchivePath)) {
+          this.logDebug("Deleted successfully");
+        } else {
+          this.logWarn("Can't delete temporary archive file: " + tempArchivePath);
+        }
       } else {
         this.logWarn("Downloaded archive not removed for direct request: " + tempArchivePath);
       }
@@ -725,7 +741,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   private void unlockSdkFolder(final File lockFile) throws IOException {
     while (lockFile.exists() && !lockFile.delete()) {
       try {
-        Thread.sleep(LOCK_FILE_SLEEP_MS);
+        sleep(LOCK_FILE_SLEEP_MS);
       } catch (InterruptedException ex) {
         Thread.currentThread().interrupt();
         throw new IOException("Unlock folder operation is interrupted", ex);
@@ -740,7 +756,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     if (!lockFile.createNewFile()) {
       while (lockFile.exists()) {
         try {
-          Thread.sleep(LOCK_FILE_SLEEP_MS);
+          sleep(LOCK_FILE_SLEEP_MS);
         } catch (InterruptedException ex) {
           Thread.currentThread().interrupt();
           throw new IOException("Lock folder operation is interrupted", ex);
