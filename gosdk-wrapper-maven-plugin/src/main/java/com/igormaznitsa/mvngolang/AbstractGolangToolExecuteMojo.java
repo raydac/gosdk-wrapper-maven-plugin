@@ -1,6 +1,8 @@
 package com.igormaznitsa.mvngolang;
 
+import static java.lang.Long.toHexString;
 import static java.lang.System.lineSeparator;
+import static java.util.Objects.requireNonNullElse;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -226,7 +228,9 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       this.logInfo("Redirect process standard output to: " + targetOutputFile);
     }
 
-    final String localId = Long.toHexString(System.nanoTime()).toUpperCase(Locale.ENGLISH);
+    final String localId =
+        requireNonNullElse(this.execution.getExecutionId(), "undefined") + '-' +
+            toHexString(System.nanoTime()).toUpperCase(Locale.ENGLISH);
 
     final Thread threadStdErr;
     final Thread threadStdOut;

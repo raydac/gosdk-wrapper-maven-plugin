@@ -792,7 +792,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
         this.logDebug("No maven proxy settings");
         result = null;
       } else {
-        this.logDebug("Using maven proxy settings");
+        this.logDebug("Using maven proxy settings: " + activeMavenProxy);
         result = new ProxySettings(
             activeMavenProxy.getProtocol(),
             activeMavenProxy.getHost(),
