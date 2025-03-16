@@ -41,7 +41,8 @@ Just add into maven build section
 
 # Mojos on board
 
-Take a look at [the description](mojo-doc-site/plugin-info.html)
+Take a look
+at [the description](https://html-preview.github.io/?url=https://github.com/raydac/gosdk-wrapper-maven-plugin/blob/main/mojo-doc-site/plugin-info.html)
 
 ## execute
 
