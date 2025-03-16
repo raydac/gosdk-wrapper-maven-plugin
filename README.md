@@ -39,6 +39,36 @@ management, and processing. Now, this is just a Maven plugin dedicated to fetchi
 
 Just add into maven build section
 
+```xml
+
+<plugin>
+    <groupId>com.igormaznitsa</groupId>
+    <artifactId>gosdk-wrapper-maven-plugin</artifactId>
+    <version>1.0.2</version>
+    <configuration>
+        <goVersion>1.24.1</goVersion>
+    </configuration>
+    <executions>
+        <execution>
+            <id>go-help</id>
+            <goals>
+                <goal>execute</goal>
+            </goals>
+            <configuration>
+                <args>
+                    <arg>help</arg>
+                </args>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+```
+
+It will automatically download GoSDK and cache it but keep in mind that the plugin makes minimalistic business and it
+doesn't provide any extra options and environment variables just out of the box, also it doesn't make any installation
+and deploy of
+projects.
+
 # Mojos on board
 
 Take a look
