@@ -35,9 +35,10 @@ functionality. However, since then, the Go ecosystem has changed significantly. 
 focused solely on downloading and executing GoSDK, removing features related to package installation, repository
 management, and processing. Now, this is just a Maven plugin dedicated to fetching and running Go tools.
 
-# Add to maven project
+# Add to a Maven project
 
-Just add into maven build section
+The plugin doesn't provide any packaging so you should use one of regular packaging like `jar`. Just add into the maven
+pom.xml build section
 
 ```xml
 
@@ -66,8 +67,33 @@ Just add into maven build section
 
 It will automatically download GoSDK and cache it but keep in mind that the plugin makes minimalistic business and it
 doesn't provide any extra options and environment variables just out of the box, also it doesn't make any installation
-and deploy of
-projects.
+and deploy of projects.
+
+During build you can see a lot of notifications from standard plugins provided by packaging, they know nothing about Go,
+so you can just move their execution into `none` phase by execution id.
+For instance
+
+```xml
+
+<plugin>
+    <artifactId>maven-clean-plugin</artifactId>
+    <executions>
+        <execution>
+            <id>default-clean</id>
+            <phase>none</phase>
+        </execution>
+    </executions>
+</plugin>
+<plugin>
+<artifactId>maven-jar-plugin</artifactId>
+<executions>
+    <execution>
+        <id>default-jar</id>
+        <phase>none</phase>
+    </execution>
+</executions>
+</plugin>
+```
 
 # Mojos on board
 
