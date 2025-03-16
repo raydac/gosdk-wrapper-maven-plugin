@@ -24,7 +24,7 @@
     </dependencies>
 
     <build>
-        <finalName>gui-gwt</finalName>
+        <finalName>gui-gwt${final.file.extension}</finalName>
         <plugins>
             <plugin>
                 <groupId>com.igormaznitsa</groupId>
@@ -75,7 +75,7 @@
                                 <arg>build</arg>
                                 <arg>-o</arg>
                                 <arg>
-                                    ${go.target.folder}${file.separator}${project.build.finalName}${final.file.extension}
+                                    ${go.target.folder}${file.separator}${project.build.finalName}
                                 </arg>
                             </args>
                         </configuration>
