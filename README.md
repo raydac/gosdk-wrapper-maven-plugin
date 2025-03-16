@@ -9,6 +9,11 @@
 
 # Changelog
 
+__1.0.3 (SNAPSHOT)__
+
+    - added `path` into `execute` mojo
+    - refactoring
+
 __1.0.2 (16-mar-2025)__
 
     - added `give-all-permissions` mojo
@@ -16,12 +21,6 @@ __1.0.2 (16-mar-2025)__
     - improved debug logging
     - disabled mass tracing log messages from Apache Http 5 Client
     - fixed wrong std output log file destination
-
-__1.0.1 (12-mar-2025)__
-
-    - fixed stuck [#1](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/1)
-    - added flag `hideLoadIndicator` to hide GoSDK loading bar from log
-    - fixed wrong default value for `workDir`
 
 [full changelog](https://github.com/raydac/gosdk-wrapper-maven-plugin/blob/master/CHANGELOG.md)
 

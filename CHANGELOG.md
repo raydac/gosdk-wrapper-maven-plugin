@@ -1,3 +1,8 @@
+# 1.0.3 (SNAPSHOT)
+
+    - added `path` into `execute` mojo
+    - refactoring
+
 # 1.0.2 (16-mar-2025)
 
     - added `give-all-permissions` mojo

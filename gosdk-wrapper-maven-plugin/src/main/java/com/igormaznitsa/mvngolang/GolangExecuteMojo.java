@@ -1,8 +1,13 @@
 package com.igormaznitsa.mvngolang;
 
+import static java.util.stream.Collectors.joining;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Optional;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -27,6 +32,15 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
   private String command;
 
   /**
+   * List of folders to find the command executable file.
+   * In the case the GoSDK folder will be excluded from search and only existing path folders will be processed.
+   *
+   * @since 1.0.3
+   */
+  @Parameter(name = "path")
+  private List<File> path;
+
+  /**
    * Skip execution of the mojo.
    *
    * @since 1.0.0
@@ -48,12 +62,28 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
     if (isNullOrEmpty(this.command)) {
       throw new IllegalArgumentException("Command must be provided");
     }
-    final Optional<Path> path = findExecutable(this.command.trim(), goSdkFolder);
-    if (path.isPresent()) {
-      this.logOptional("Found file for command: " + path.get());
-      return path.get();
+    final List<Path> foundExecutables;
+    if (this.path == null || this.path.isEmpty()) {
+      this.logDebug("Path is not defined, use GoSDK folder: " + goSdkFolder);
+      foundExecutables = findExecutable(this.command.trim(), List.of(goSdkFolder), true, true);
     } else {
-      this.logError("Can't find any executable file as command: " + this.command);
+      this.logOptional("Find in path: " +
+          this.path.stream().map(File::toString).collect(joining(File.pathSeparator)));
+      foundExecutables = findExecutable(this.command.trim(), this.path.stream().filter(
+          Objects::nonNull).map(File::toPath).collect(Collectors.toList()), false, false);
+    }
+    if (foundExecutables.isEmpty()) {
+      this.logError("Can't find command '" + this.command + "' in path: "
+          + this.path.stream().map(File::toString).collect(joining(File.pathSeparator)));
+      return null;
+    } else if (foundExecutables.size() == 1) {
+      final Path found = foundExecutables.get(0);
+      this.logOptional("Found command executable file: " + found);
+      return found;
+    } else {
+      this.logError(
+          "Unexpectedly found several executable files to be recognized as the command: " +
+              foundExecutables);
       return null;
     }
   }

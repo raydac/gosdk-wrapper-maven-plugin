@@ -139,7 +139,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     final Path executable = this.findCommand(goSdkFolder, Path.of(System.getProperty("java.home")));
 
     if (executable == null) {
-      throw new MojoExecutionException("Executable is null");
+      throw new MojoFailureException("Can't find executable command file, see log");
     } else {
       this.logDebug("Provided command file path: " + executable);
     }

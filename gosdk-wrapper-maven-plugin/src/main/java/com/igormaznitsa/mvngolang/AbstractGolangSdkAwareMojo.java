@@ -4,6 +4,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.System.out;
 import static java.lang.Thread.sleep;
+import static java.nio.file.Files.isRegularFile;
 
 import com.igormaznitsa.mvngolang.utils.ApacheHttpClient5Loader;
 import com.igormaznitsa.mvngolang.utils.ArchiveUnpacker;
@@ -23,7 +24,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -247,16 +247,13 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     return progress;
   }
 
-  protected static Optional<Path> findExecutable(final String fileName, final Path folder)
-      throws IOException {
+  protected static List<Path> findExecutable(
+      final String fileName,
+      final List<Path> folders,
+      final boolean findInBinSubfolder,
+      final boolean walkSubfolders) throws IOException {
     if (fileName == null) {
       throw new NullPointerException("File name is null");
-    }
-    if (folder == null) {
-      throw new NullPointerException("Folder is null");
-    }
-    if (!Files.isDirectory(folder)) {
-      throw new IllegalArgumentException("Is not a folder: " + folder);
     }
 
     if (SystemUtils.IS_OS_WINDOWS && fileName.contains(":")) {
@@ -264,8 +261,14 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
 
     if (fileName.contains("/") || fileName.contains("\\")) {
-      final Path path = folder.resolve(fileName);
-      return Files.isRegularFile(path) ? Optional.of(path) : Optional.empty();
+      final List<Path> result = new ArrayList<>();
+      for (final Path p : folders) {
+        final Path filePath = p.resolve(fileName);
+        if (isRegularFile(filePath)) {
+          result.add(filePath);
+        }
+      }
+      return result;
     }
 
     final Set<String> variants;
@@ -284,23 +287,28 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
           .collect(Collectors.toSet());
     }
 
-    final Path folderBin = folder.resolve("bin");
-    if (Files.isDirectory(folderBin)) {
-      try (Stream<Path> walker = Files.walk(folderBin)) {
-        final Optional<Path> found = walker.filter(
-                x -> Files.isRegularFile(x) && variants.contains(x.getFileName().toString()))
-            .findFirst();
-        if (found.isPresent()) {
-          return found;
+    final List<Path> result = new ArrayList<>();
+    if (findInBinSubfolder) {
+      for (final Path path : folders) {
+        final Path folderBin = path.resolve("bin");
+        if (Files.isDirectory(folderBin)) {
+          try (
+              Stream<Path> walker = Files.walk(folderBin, walkSubfolders ? Integer.MAX_VALUE : 0)) {
+            walker
+                .filter(x -> isRegularFile(x) && variants.contains(x.getFileName().toString()))
+                .forEach(result::add);
+          }
+        }
+      }
+    } else {
+      for (final Path path : folders) {
+        try (Stream<Path> walker = Files.walk(path, walkSubfolders ? Integer.MAX_VALUE : 0)) {
+          walker.filter(x -> isRegularFile(x) && variants.contains(x.getFileName().toString()))
+              .forEach(result::add);
         }
       }
     }
-
-    try (Stream<Path> walker = Files.walk(folder)) {
-      return walker.filter(
-              x -> Files.isRegularFile(x) && variants.contains(x.getFileName().toString()))
-          .findFirst();
-    }
+    return result;
   }
 
   private String findSdkBaseName() {
@@ -641,7 +649,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   private void makeExecutableFilesInFolder(final Path folder) throws IOException {
     try (Stream<Path> walker = Files.walk(folder)) {
       walker.filter(
-          path -> Files.isRegularFile(path)
+          path -> isRegularFile(path)
               && !Files.isSymbolicLink(path)
               && !Files.isExecutable(path)
       ).forEach(path -> {
