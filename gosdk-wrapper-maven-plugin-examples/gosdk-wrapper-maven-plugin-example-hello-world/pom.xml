@@ -23,15 +23,51 @@
                 <artifactId>gosdk-wrapper-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>go-test</id>
+                        <id>go-test-install-gojunitreport</id>
                         <phase>test</phase>
                         <goals>
                             <goal>execute</goal>
                         </goals>
                         <configuration>
                             <args>
+                                <arg>install</arg>
+                                <arg>github.com/jstemmer/go-junit-report/v2@latest</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>go-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <logFileStd>${go.target.temp.build}/coverage.out</logFileStd>
+                            <args>
                                 <arg>test</arg>
-                                <arg>-coverprofile=${go.target.temp.build}/coverage.out</arg>
+                                <arg>-v</arg>
+                                <arg>-cover</arg>
+                                <arg>./...</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>go-make-junit-from-cover</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <command>go-junit-report</command>
+                            <path>
+                                <folder>${go.target.temp.build}</folder>
+                            </path>
+                            <args>
+                                <arg>-set-exit-code</arg>
+                                <arg>-in</arg>
+                                <arg>${go.target.temp.build}/coverage.out</arg>
+                                <arg>-out</arg>
+                                <arg>${go.target.temp.build}/junit-coverage.xml</arg>
                             </args>
                         </configuration>
                     </execution>
