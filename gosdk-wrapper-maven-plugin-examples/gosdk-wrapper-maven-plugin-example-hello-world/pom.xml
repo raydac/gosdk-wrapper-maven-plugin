@@ -23,6 +23,19 @@
                 <artifactId>gosdk-wrapper-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>go-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>test</arg>
+                                <arg>-coverprofile=${go.target.temp.build}/coverage.out</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>go-build</id>
                         <goals>
                             <goal>execute</goal>
