@@ -32,7 +32,7 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
   private String command;
 
   /**
-   * List of folders to find the command executable file.
+   * List of folders to find the command executable file. <strong>It is only to find executable file!</strong>
    * In the case the GoSDK folder will be excluded from search and only existing path folders will be processed.
    *
    * @since 1.0.3
