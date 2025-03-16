@@ -1,4 +1,4 @@
-# 1.0.2 (SNAPSHOT)
+# 1.0.2 (16-mar-2025)
 
     - added `give-all-permissions` mojo
     - fixed exception under Windows (#3)

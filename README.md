@@ -2,14 +2,14 @@
 
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%20License%202.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Java 11.0+](https://img.shields.io/badge/java-11.0%2b-green.svg)](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-[![Maven central](https://maven-badges.herokuapp.com/maven-central/com.igormaznitsa/gosdk-wrapper-maven-plugin/badge.svg)](http://search.maven.org/#artifactdetails|com.igormaznitsa|gosdk-wrapper-maven-plugin|1.0.1|jar)
+[![Maven central](https://maven-badges.herokuapp.com/maven-central/com.igormaznitsa/gosdk-wrapper-maven-plugin/badge.svg)](http://search.maven.org/#artifactdetails|com.igormaznitsa|gosdk-wrapper-maven-plugin|1.0.2|jar)
 [![Maven 3.8.1+](https://img.shields.io/badge/maven-3.8.1%2b-green.svg)](https://maven.apache.org/)
 [![PayPal donation](https://img.shields.io/badge/donation-PayPal-cyan.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AHWJHJFBAWGL2)
 [![YooMoney donation](https://img.shields.io/badge/donation-Yoo.money-blue.svg)](https://yoomoney.ru/to/41001158080699)
 
 # Changelog
 
-__1.0.2 (SNAPSHOT)__
+__1.0.2 (16-mar-2025)__
 
     - added `give-all-permissions` mojo
     - fixed exception under Windows (#3)
@@ -23,10 +23,6 @@ __1.0.1 (12-mar-2025)__
     - added flag `hideLoadIndicator` to hide GoSDK loading bar from log
     - fixed wrong default value for `workDir`
 
-__1.0.0 (03-mar-2025)__
-
-    - initial version
-
 [full changelog](https://github.com/raydac/gosdk-wrapper-maven-plugin/blob/master/CHANGELOG.md)
 
 # What is it?
@@ -39,7 +35,13 @@ functionality. However, since then, the Go ecosystem has changed significantly. 
 focused solely on downloading and executing GoSDK, removing features related to package installation, repository
 management, and processing. Now, this is just a Maven plugin dedicated to fetching and running Go tools.
 
+# Add to maven project
+
+Just add into maven build section
+
 # Mojos on board
+
+Take a look at [the description](mojo-doc-site/plugin-info.html)
 
 ## execute
 
@@ -50,88 +52,6 @@ Download a GoSDK if not cached and find a tool to be executed with provided envi
 Some Go packages can't be removed by regular maven clean plugin because can contain read only files. This mojo allows to
 remove such folders.
 
-# How to use
+## give-all-permissions
 
-Let's take a look at the call go to print its help. Just add the plugin into the module build section.
-
-```xml
-
-<plugin>
-    <groupId>com.igormaznitsa</groupId>
-    <artifactId>gosdk-wrapper-maven-plugin</artifactId>
-    <version>1.0.1</version>
-    <configuration>
-        <goVersion>1.24.1</goVersion>
-    </configuration>
-    <executions>
-        <execution>
-            <id>go-help</id>
-            <goals>
-                <goal>execute</goal>
-            </goals>
-            <configuration>
-                <args>
-                    <arg>help</arg>
-                </args>
-            </configuration>
-        </execution>
-    </executions>
-</plugin>
-```
-
-So now it will download and cached GoSDK and make call go tool with help CLI argument.
-In the same time you can see log records of a lot of another maven plugin dedicated to Java project. You can disable
-them with below code snippet.
-
-```xml
-
-<plugin>
-    <artifactId>maven-clean-plugin</artifactId>
-    <executions>
-        <execution>
-            <id>default-clean</id>
-            <phase>none</phase>
-        </execution>
-    </executions>
-</plugin>
-<plugin>
-<artifactId>maven-jar-plugin</artifactId>
-<executions>
-    <execution>
-        <id>default-jar</id>
-        <phase>none</phase>
-    </execution>
-</executions>
-</plugin>
-<plugin>
-<artifactId>maven-surefire-plugin</artifactId>
-<executions>
-    <execution>
-        <id>default-test</id>
-        <phase>none</phase>
-    </execution>
-</executions>
-</plugin>
-<plugin>
-<artifactId>maven-compiler-plugin</artifactId>
-<executions>
-    <execution>
-        <id>default-compile</id>
-        <phase>none</phase>
-    </execution>
-    <execution>
-        <id>default-testCompile</id>
-        <phase>none</phase>
-    </execution>
-</executions>
-</plugin>
-<plugin>
-<artifactId>maven-install-plugin</artifactId>
-<executions>
-    <execution>
-        <id>default-install</id>
-        <phase>none</phase>
-    </execution>
-</executions>
-</plugin>
-```
+Trying to provide all permissions to files in specified folders, it works with list of Maven FileSets.
