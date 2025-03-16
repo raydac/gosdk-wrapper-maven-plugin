@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNullElse;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,11 +18,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -235,36 +237,47 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     final Thread threadStdErr;
     final Thread threadStdOut;
     final Process process;
+
+    final Lock stdErrLock = new ReentrantLock(true);
+    final Lock stdOutLock = new ReentrantLock(true);
     try {
       this.logInfo("Starting command");
       process = processBuilder.start();
       threadStdErr =
           this.prepareCatchStream("thread-process-stderr-" + localId, process.getErrorStream(),
-              line -> {
+              (line, eol) -> {
                 if (!this.hideProcessOutput) {
                   this.logWarn(">stderr: " + line);
                 }
                 if (targetErrorFile != null) {
-                  try {
-                    FileUtils.write(targetErrorFile, line + lineSeparator(),
-                        Charset.defaultCharset(), true);
+                  stdErrLock.lock();
+                  try (FileOutputStream outputFile = new FileOutputStream(targetErrorFile, true)) {
+                    outputFile.write(
+                        (line + (eol ? lineSeparator() : "")).getBytes(Charset.defaultCharset()));
+                    outputFile.flush();
                   } catch (IOException ex) {
-                    this.logError("Can't append record to log stderr file: " + ex.getMessage());
+                    this.logError("Can't append record to log stderr file: " + ex);
+                  } finally {
+                    stdErrLock.unlock();
                   }
                 }
               });
       threadStdOut =
           this.prepareCatchStream("thread-process-stdout-" + localId, process.getInputStream(),
-              line -> {
+              (line, eol) -> {
                 if (!this.hideProcessOutput) {
                   this.logInfo(">stdout: " + line);
                 }
                 if (targetOutputFile != null) {
-                  try {
-                    FileUtils.write(targetOutputFile, line + lineSeparator(),
-                        Charset.defaultCharset(), true);
+                  stdOutLock.lock();
+                  try (FileOutputStream outputFile = new FileOutputStream(targetOutputFile, true)) {
+                    outputFile.write(
+                        (line + (eol ? lineSeparator() : "")).getBytes(Charset.defaultCharset()));
+                    outputFile.flush();
                   } catch (IOException ex) {
-                    this.logError("Can't append record to log stdout file: " + ex.getMessage());
+                    this.logError("Can't append record to log stdout file: " + ex);
+                  } finally {
+                    stdOutLock.unlock();
                   }
                 }
               });
@@ -320,8 +333,18 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       Thread.currentThread().interrupt();
       return;
     } finally {
-      threadStdOut.interrupt();
-      threadStdErr.interrupt();
+      stdOutLock.lock();
+      try {
+        threadStdOut.interrupt();
+      } finally {
+        stdOutLock.unlock();
+      }
+      stdErrLock.lock();
+      try {
+        threadStdErr.interrupt();
+      } finally {
+        stdErrLock.unlock();
+      }
     }
 
     if (exitCode != this.expectedExitCode) {
@@ -332,7 +355,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private Thread prepareCatchStream(
       final String threadId,
       final InputStream inputStream,
-      final Consumer<String> lineConsumer
+      final BiConsumer<String, Boolean> lineConsumer
   ) {
     final Thread thread = new Thread(() -> {
       this.logDebug("Start catchStream thread " + threadId);
@@ -346,14 +369,14 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
             break;
           }
           if (nextChar == '\n') {
-            lineConsumer.accept(buffer.toString());
+            lineConsumer.accept(buffer.toString(), true);
             buffer.setLength(0);
           } else {
             buffer.append((char) nextChar);
           }
         }
         if (buffer.length() > 0) {
-          lineConsumer.accept(buffer.toString());
+          lineConsumer.accept(buffer.toString(), false);
         }
       } catch (IOException ex) {
         this.logError(

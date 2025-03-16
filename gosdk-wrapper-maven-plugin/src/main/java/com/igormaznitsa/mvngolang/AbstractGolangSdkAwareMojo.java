@@ -293,7 +293,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
         final Path folderBin = path.resolve("bin");
         if (Files.isDirectory(folderBin)) {
           try (
-              Stream<Path> walker = Files.walk(folderBin, walkSubfolders ? Integer.MAX_VALUE : 0)) {
+              Stream<Path> walker = Files.walk(folderBin, walkSubfolders ? Integer.MAX_VALUE : 1)) {
             walker
                 .filter(x -> isRegularFile(x) && variants.contains(x.getFileName().toString()))
                 .forEach(result::add);
@@ -302,7 +302,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
       }
     } else {
       for (final Path path : folders) {
-        try (Stream<Path> walker = Files.walk(path, walkSubfolders ? Integer.MAX_VALUE : 0)) {
+        try (Stream<Path> walker = Files.walk(path, walkSubfolders ? Integer.MAX_VALUE : 1)) {
           walker.filter(x -> isRegularFile(x) && variants.contains(x.getFileName().toString()))
               .forEach(result::add);
         }
