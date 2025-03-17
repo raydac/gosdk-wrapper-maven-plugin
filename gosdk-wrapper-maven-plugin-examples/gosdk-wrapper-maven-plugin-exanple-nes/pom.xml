@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.igormaznitsa</groupId>
+        <artifactId>gosdk-wrapper-maven-plugin-examples</artifactId>
+        <version>0.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>gosdk-wrapper-maven-plugin-example-nes</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <description>Example of usage CLUI library for GUI (https://github.com/VladimirMarkelov/clui).</description>
+
+    <build>
+        <finalName>nes${final.file.extension}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>com.igormaznitsa</groupId>
+                <artifactId>gosdk-wrapper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>go-get-portaudio-nes</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>get</arg>
+                                <arg>-u</arg>
+                                <arg>github.com/go-gl/gl/v2.1/gl</arg>
+                                <arg>github.com/go-gl/glfw/v3.1/glfw</arg>
+                                <arg>github.com/gordonklaus/portaudio</arg>
+                                <arg>github.com/fogleman/nes</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>go-build-nes</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <echoWarn>
+                                <warn>If error with native parts then install them with : sudo apt-get install portaudio19-dev libgl1-mesa-dev xorg-dev</warn>
+                            </echoWarn>
+                            <args>
+                                <arg>build</arg>
+                                <arg>-o</arg>
+                                <arg>${go.target.folder}${file.separator}${project.build.finalName}</arg>
+                                <arg>github.com/fogleman/nes</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
