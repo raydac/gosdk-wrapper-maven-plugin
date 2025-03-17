@@ -31,6 +31,7 @@
         <module>gosdk-wrapper-maven-plugin-example-fyne</module>
         <module>gosdk-wrapper-maven-plugin-example-goterm</module>
         <module>gosdk-wrapper-maven-plugin-example-gwt</module>
+        <module>gosdk-wrapper-maven-plugin-example-oak-shooter</module>
     </modules>
 
     <name>Mvn Golang plugin tests</name>
