@@ -2,7 +2,7 @@
 
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%20License%202.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Java 11.0+](https://img.shields.io/badge/java-11.0%2b-green.svg)](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-[![Maven central](https://img.shields.io/badge/maven-central-1.0.3%2b-green.svg)](http://search.maven.org/#artifactdetails|com.igormaznitsa|gosdk-wrapper-maven-plugin|1.0.2|jar)
+[![Maven Central](https://img.shields.io/maven-central/v/com.igormaznitsa/gosdk-wrapper-maven-plugin)](http://search.maven.org/#artifactdetails|com.igormaznitsa|gosdk-wrapper-maven-plugin|1.0.2|jar)
 [![Maven 3.8.1+](https://img.shields.io/badge/maven-3.8.1%2b-green.svg)](https://maven.apache.org/)
 [![PayPal donation](https://img.shields.io/badge/donation-PayPal-cyan.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AHWJHJFBAWGL2)
 [![YooMoney donation](https://img.shields.io/badge/donation-Yoo.money-blue.svg)](https://yoomoney.ru/to/41001158080699)
@@ -75,24 +75,26 @@ For instance
 
 ```xml
 
-<plugin>
-    <artifactId>maven-clean-plugin</artifactId>
-    <executions>
-        <execution>
-            <id>default-clean</id>
-            <phase>none</phase>
-        </execution>
-    </executions>
-</plugin>
-<plugin>
-<artifactId>maven-jar-plugin</artifactId>
-<executions>
-    <execution>
-        <id>default-jar</id>
-        <phase>none</phase>
-    </execution>
-</executions>
-</plugin>
+<plugins>
+    <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>default-clean</id>
+                <phase>none</phase>
+            </execution>
+        </executions>
+    </plugin>
+    <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>default-jar</id>
+                <phase>none</phase>
+            </execution>
+        </executions>
+    </plugin>
+</plugins>
 ```
 
 # Mojos on board
