@@ -13,7 +13,7 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <description>Example of usage CLUI library for GUI (https://github.com/VladimirMarkelov/clui).</description>
+    <description>Example of build the NES emulator project, https://github.com/fogleman/nes</description>
 
     <build>
         <finalName>nes${final.file.extension}</finalName>
