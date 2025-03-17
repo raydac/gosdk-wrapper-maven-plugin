@@ -22,6 +22,11 @@
         <go.target.temp.build>${project.basedir}${file.separator}.build</go.target.temp.build>
         <go.reports.folder>${project.basedir}${file.separator}.reports</go.reports.folder>
         <go.path.folder>${project.basedir}${file.separator}.gopath</go.path.folder>
+
+        <maven.install.skip>true</maven.install.skip>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <maven.clean.skip>true</maven.clean.skip>
+
         <final.file.extension></final.file.extension>
     </properties>
 
@@ -105,14 +110,6 @@
                         <artifactId>maven-resources-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>default-resources</id>
-                                <phase>none</phase>
-                            </execution>
-                            <execution>
-                                <id>default-testResources</id>
-                                <phase>none</phase>
-                            </execution>
-                            <execution>
                                 <id>copy-resources-to-temp-build</id>
                                 <goals>
                                     <goal>copy-resources</goal>
@@ -131,57 +128,6 @@
                                         </resource>
                                     </resources>
                                 </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- disable default maven plugin calls -->
-                    <plugin>
-                        <artifactId>maven-clean-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>default-clean</id>
-                                <phase>none</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>default-jar</id>
-                                <phase>none</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>default-test</id>
-                                <phase>none</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>default-compile</id>
-                                <phase>none</phase>
-                            </execution>
-                            <execution>
-                                <id>default-testCompile</id>
-                                <phase>none</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-install-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>default-install</id>
-                                <phase>none</phase>
                             </execution>
                         </executions>
                     </plugin>
