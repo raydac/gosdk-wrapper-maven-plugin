@@ -27,8 +27,7 @@ Just add the plugin into the module build section.
 </plugin>
 ```
 
-So now it will download and cached GoSDK and make call go tool with help CLI argument.
-In the same time you can see log records of a lot of another maven plugin dedicated to Java project. You can disable
+If you use `jar` packaging then you should deactivate default plugin calls. You can disable
 them with below code snippet.
 
 ```xml

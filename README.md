@@ -2,7 +2,7 @@
 
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%20License%202.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Java 11.0+](https://img.shields.io/badge/java-11.0%2b-green.svg)](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-[![Maven central](https://maven-badges.herokuapp.com/maven-central/com.igormaznitsa/gosdk-wrapper-maven-plugin/badge.svg)](http://search.maven.org/#artifactdetails|com.igormaznitsa|gosdk-wrapper-maven-plugin|1.0.2|jar)
+[![Maven central](https://img.shields.io/badge/maven-central-1.0.3%2b-green.svg)](http://search.maven.org/#artifactdetails|com.igormaznitsa|gosdk-wrapper-maven-plugin|1.0.2|jar)
 [![Maven 3.8.1+](https://img.shields.io/badge/maven-3.8.1%2b-green.svg)](https://maven.apache.org/)
 [![PayPal donation](https://img.shields.io/badge/donation-PayPal-cyan.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AHWJHJFBAWGL2)
 [![YooMoney donation](https://img.shields.io/badge/donation-Yoo.money-blue.svg)](https://yoomoney.ru/to/41001158080699)
@@ -11,16 +11,17 @@
 
 __1.0.3 (SNAPSHOT)__
 
-    - added `path` into `execute` mojo
-    - refactoring
+- improved examples
+- added `path` into `execute` mojo
+- refactoring
 
 __1.0.2 (16-mar-2025)__
 
-    - added `give-all-permissions` mojo
-    - fixed exception under Windows (#3)
-    - improved debug logging
-    - disabled mass tracing log messages from Apache Http 5 Client
-    - fixed wrong std output log file destination
+- added `give-all-permissions` mojo
+- fixed exception under Windows (#3)
+- improved debug logging
+- disabled mass tracing log messages from Apache Http 5 Client
+- fixed wrong std output log file destination
 
 [full changelog](https://github.com/raydac/gosdk-wrapper-maven-plugin/blob/master/CHANGELOG.md)
 
@@ -36,7 +37,7 @@ management, and processing. Now, this is just a Maven plugin dedicated to fetchi
 
 # Add to a Maven project
 
-The plugin doesn't provide any packaging so you should use one of regular packaging like `jar`. Just add into the maven
+The plugin doesn't provide any packaging so you should use one of regular packaging like `pom` (if you use `jar` then maven injects a lot of default calls for Java specific plugins). Just add into the maven
 pom.xml build section
 
 ```xml
@@ -68,8 +69,8 @@ It will automatically download GoSDK and cache it but keep in mind that the plug
 doesn't provide any extra options and environment variables just out of the box, also it doesn't make any installation
 and deploy of projects.
 
-During build you can see a lot of notifications from standard plugins provided by packaging, they know nothing about Go,
-so you can just move their execution into `none` phase by execution id. Also you can use just `pom` packaging instead of `jar` packaging.
+If you use something else than `pom` packaging then during build you can see a lot of notifications from standard plugins provided by packaging, they know nothing about Go,
+so you can just move their execution into `none` phase by execution id.
 For instance
 
 ```xml

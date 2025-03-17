@@ -1,5 +1,6 @@
 # 1.0.3 (SNAPSHOT)
 
+    - improved examples
     - added `path` into `execute` mojo
     - refactoring
 
