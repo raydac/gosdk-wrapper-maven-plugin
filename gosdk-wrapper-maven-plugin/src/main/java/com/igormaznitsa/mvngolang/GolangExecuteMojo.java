@@ -25,6 +25,8 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
 
   /**
    * Command to be executed.
+   * By default, the mojo will be looking for the command in GoSDK folder and its bin subfolder, but it is possible to provide custom path for search through <strong>path</strong> parameter.
+   * It can be just a name without extension and in the case all executable extensions for the platform will be used to search. If it is some relative or absolute path then the path will be used.
    *
    * @since 1.0.0
    */
@@ -32,8 +34,8 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
   private String command;
 
   /**
-   * List of folders to find the command executable file. <strong>It is only to find executable file!</strong>
-   * In the case the GoSDK folder will be excluded from search and only existing path folders will be processed.
+   * List of folders to find the command executable file. <strong>It is only to find executable file defined as command and doesn't affect environment variables!</strong>
+   * In the case the GoSDK folder will be excluded from search and only the listed existing path folders will be processed for search.
    *
    * @since 1.0.3
    */
