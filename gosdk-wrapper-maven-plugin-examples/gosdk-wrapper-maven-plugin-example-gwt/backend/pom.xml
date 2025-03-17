@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>backend</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <description>Backend part of the GoLang+GWT example, it implements the server side.</description>
 

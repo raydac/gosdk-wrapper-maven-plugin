@@ -11,7 +11,7 @@
 
     <artifactId>gosdk-wrapper-maven-plugin-example-hello-world</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <description>Just Go Hello world.</description>
 

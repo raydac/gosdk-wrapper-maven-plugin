@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>gosdk-wrapper-maven-plugin-example-goterm</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <description>Example of GoTerm usage with GoLang https://github.com/buger/goterm</description>
 

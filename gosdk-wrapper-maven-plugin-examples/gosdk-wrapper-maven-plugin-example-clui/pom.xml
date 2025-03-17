@@ -11,7 +11,7 @@
 
     <artifactId>gosdk-wrapper-maven-plugin-example-clui</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <description>Example of usage CLUI library for GUI (https://github.com/VladimirMarkelov/clui).</description>
 

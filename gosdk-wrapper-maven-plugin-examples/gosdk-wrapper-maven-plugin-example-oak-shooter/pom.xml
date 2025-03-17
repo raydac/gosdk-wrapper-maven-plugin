@@ -11,7 +11,7 @@
 
     <artifactId>gosdk-wrapper-maven-plugin-example-oak-shooter</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <description>Oak Shooter build example https://github.com/oakmound/oak</description>
 

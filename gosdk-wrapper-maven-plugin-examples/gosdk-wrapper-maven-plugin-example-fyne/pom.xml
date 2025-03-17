@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>gosdk-wrapper-maven-plugin-example-fyne</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <description>It builds a sample from https://github.com/fyne-io/fyne</description>
 
