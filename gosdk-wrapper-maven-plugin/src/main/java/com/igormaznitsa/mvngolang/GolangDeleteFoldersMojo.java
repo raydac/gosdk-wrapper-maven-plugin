@@ -53,7 +53,7 @@ public class GolangDeleteFoldersMojo extends AbstractFileProcessingMojo {
   }
 
   @Override
-  public void execute() throws MojoFailureException {
+  public void doExecute() throws MojoFailureException {
     if (this.isSkip()) {
       this.logInfo("Delete folders is skipped");
       return;

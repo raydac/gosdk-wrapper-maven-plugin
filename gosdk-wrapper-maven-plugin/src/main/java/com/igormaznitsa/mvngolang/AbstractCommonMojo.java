@@ -1,9 +1,12 @@
 package com.igormaznitsa.mvngolang;
 
 import java.io.File;
+import java.util.List;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.settings.Settings;
 
@@ -25,6 +28,22 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
    */
   @Parameter(property = "mvn.golang.verbose", name = "verbose", defaultValue = "false")
   protected boolean verbose;
+
+  /**
+   * List of messages to be printed into log as INFO.
+   *
+   * @since 1.0.3
+   */
+  @Parameter(name = "echo")
+  protected List<String> echo;
+
+  /**
+   * List of messages to be printed into log as WARN.
+   *
+   * @since 1.0.3
+   */
+  @Parameter(name = "echoWarn")
+  protected List<String> echoWarn;
 
   /**
    * Enable tracing messages into debug log ,active only if debug mode activated.
@@ -75,4 +94,19 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
       this.getLog().warn(text);
     }
   }
+
+  @Override
+  public final void execute() throws MojoExecutionException, MojoFailureException {
+    if (this.echo != null && !this.echo.isEmpty()) {
+      this.echo.forEach(this::logInfo);
+    }
+
+    if (this.echoWarn != null && !this.echoWarn.isEmpty()) {
+      this.echoWarn.forEach(this::logWarn);
+    }
+
+    this.doExecute();
+  }
+
+  public abstract void doExecute() throws MojoExecutionException, MojoFailureException;
 }

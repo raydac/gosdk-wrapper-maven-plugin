@@ -16,7 +16,7 @@
     <description>Just Go Hello world.</description>
 
     <build>
-        <finalName>HelloWorld</finalName>
+        <finalName>HelloWorld${final.file.extension}</finalName>
         <plugins>
             <plugin>
                 <groupId>com.igormaznitsa</groupId>

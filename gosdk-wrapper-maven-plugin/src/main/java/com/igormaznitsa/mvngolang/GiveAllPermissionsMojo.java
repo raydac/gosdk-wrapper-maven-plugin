@@ -70,7 +70,7 @@ public class GiveAllPermissionsMojo extends AbstractFileProcessingMojo {
   }
 
   @Override
-  public void execute() throws MojoExecutionException, MojoFailureException {
+  public void doExecute() throws MojoExecutionException, MojoFailureException {
     if (this.isSkip()) {
       this.logInfo("Skipped");
     } else {

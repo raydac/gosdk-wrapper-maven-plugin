@@ -322,7 +322,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   }
 
   @Override
-  public final void execute() throws MojoExecutionException, MojoFailureException {
+  public final void doExecute() throws MojoExecutionException, MojoFailureException {
     if (this.isSkip()) {
       this.logInfo("Skip execution");
       return;
