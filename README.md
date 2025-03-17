@@ -69,7 +69,7 @@ doesn't provide any extra options and environment variables just out of the box,
 and deploy of projects.
 
 During build you can see a lot of notifications from standard plugins provided by packaging, they know nothing about Go,
-so you can just move their execution into `none` phase by execution id.
+so you can just move their execution into `none` phase by execution id. Also you can use just `pom` packaging instead of `jar` packaging.
 For instance
 
 ```xml
