@@ -21,6 +21,16 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
   @Parameter(defaultValue = "${mojoExecution}", readonly = true, required = true)
   protected MojoExecution execution;
 
+  protected static final String DEFAULT_GO_PATH_FOLDER = ".go_path";
+
+  /**
+   * Folder caching downloaded and unpacked GoSDKs.
+   *
+   * @since 1.0.0
+   */
+  @Parameter(property = "mvn.golang.store.folder", defaultValue = "${user.home}${file.separator}.mvnGoLang", name = "storeFolder")
+  protected File storeFolder;
+
   /**
    * Make verbose log output.
    *
@@ -58,6 +68,10 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
   }
 
   protected abstract boolean isSkip();
+
+  protected File makeDefaultGoPath() {
+    return new File(this.storeFolder, DEFAULT_GO_PATH_FOLDER);
+  }
 
   protected void logTrace(final String text) {
     if (text != null && this.trace && this.getLog().isDebugEnabled()) {

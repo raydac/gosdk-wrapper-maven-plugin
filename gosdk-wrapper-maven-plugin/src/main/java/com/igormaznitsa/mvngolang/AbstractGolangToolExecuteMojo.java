@@ -47,6 +47,15 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private boolean makeExecutable;
 
   /**
+   * Add internal GOPATH if there is not any already provided by environment.
+   * The GOPATH will be [storeFolder]/.go_path
+   *
+   * @since 1.0.3
+   */
+  @Parameter(property = "mvn.golang.may.add.internal.gopath", name = "mayAddInternalGOPATH", defaultValue = "true")
+  private boolean mayAddInternalGOPATH;
+
+  /**
    * List of environment variable to be removed. All listed variables will be removed from environment of executing process.
    *
    * @since 1.0.0
@@ -228,6 +237,13 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     this.logOptional("Work directory: " + workDir);
 
     processBuilder.redirectErrorStream(true);
+
+    if (!processBuilder.environment().containsKey("GOPATH") && this.mayAddInternalGOPATH) {
+      final File defaultGoPath = this.makeDefaultGoPath();
+      if (processBuilder.environment().put("GOPATH", defaultGoPath.getAbsolutePath()) == null) {
+        this.logInfo("Can't find defined GOPATH, using internal folder instead: " + defaultGoPath);
+      }
+    }
 
     final File targetOutputFile;
     final File targetErrorFile;

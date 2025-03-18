@@ -21,7 +21,6 @@
         <go.resource.folder>${project.basedir}${file.separator}res</go.resource.folder>
         <go.target.temp.build>${project.basedir}${file.separator}.build</go.target.temp.build>
         <go.reports.folder>${project.basedir}${file.separator}.reports</go.reports.folder>
-        <go.path.folder>${project.basedir}${file.separator}.gopath</go.path.folder>
 
         <maven.install.skip>true</maven.install.skip>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -96,7 +95,6 @@
                                 <configuration>
                                     <forceDelete>true</forceDelete>
                                     <folders>
-                                        <folder>${go.path.folder}</folder>
                                         <folder>${go.target.folder}</folder>
                                         <folder>${go.target.temp.build}</folder>
                                         <folder>${go.reports.folder}</folder>
@@ -148,7 +146,6 @@
                         <workDir>${go.target.temp.build}</workDir>
                         <env>
                             <GOBIN>${go.target.temp.build}</GOBIN>
-                            <GOPATH>${go.path.folder}</GOPATH>
                         </env>
                         <envLast>
                             <PATH>${path.separator}${go.target.temp.build}</PATH>

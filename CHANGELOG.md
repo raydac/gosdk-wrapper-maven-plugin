@@ -2,7 +2,7 @@
 
     - improved examples
     - added `echo` and `echoWarn` for all mojos
-    - added `path` into `execute` mojo
+    - added `path` and `mayAddInternalGOPATH` into `execute` mojo
     - refactoring
 
 # 1.0.2 (16-mar-2025)

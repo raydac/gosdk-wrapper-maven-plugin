@@ -97,13 +97,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   @Parameter(property = "mvn.golang.sdk.archive.base.name", name = "sdkArchiveBaseName")
   private String sdkArchiveBaseName;
   /**
-   * Folder caching downloaded and unpacked GoSDKs.
-   *
-   * @since 1.0.0
-   */
-  @Parameter(property = "mvn.golang.store.folder", defaultValue = "${user.home}${file.separator}.mvnGoLang", name = "storeFolder")
-  private String storeFolder;
-  /**
    * Folder to download SDK archives.
    *
    * @since 1.0.0
@@ -359,8 +352,8 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
       throws MojoFailureException, MojoExecutionException {
     final Path cacheFolder;
     try {
-      this.logOptional("Finding or creating store folder: " + this.storeFolder.trim());
-      cacheFolder = Files.createDirectories(Path.of(this.storeFolder.trim()));
+      this.logOptional("Finding or creating store folder: " + this.storeFolder);
+      cacheFolder = Files.createDirectories(this.storeFolder.toPath());
     } catch (IOException ex) {
       throw new MojoFailureException(
           "Can't create cache folder or it is not a folder exists: " + this.storeFolder);
@@ -428,7 +421,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   private Path findDownloadArchiveFolder() throws IOException {
     final Path result;
     if (isNullOrEmpty(this.downloadArchiveFolder)) {
-      result = new File(this.storeFolder.trim()).toPath();
+      result = this.storeFolder.toPath();
     } else {
       result = new File(this.downloadArchiveFolder.trim()).toPath();
     }
