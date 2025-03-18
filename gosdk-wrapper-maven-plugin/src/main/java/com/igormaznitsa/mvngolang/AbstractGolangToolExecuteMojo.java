@@ -39,6 +39,14 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private String workDir;
 
   /**
+   * Try to make the found command file as executable.
+   *
+   * @since 1.0.3
+   */
+  @Parameter(name = "makeExecutable", defaultValue = "false")
+  private boolean makeExecutable;
+
+  /**
    * List of environment variable to be removed. All listed variables will be removed from environment of executing process.
    *
    * @since 1.0.0
@@ -141,13 +149,23 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     final Path executable = this.findCommand(goSdkFolder, Path.of(System.getProperty("java.home")));
 
     if (executable == null) {
-      throw new MojoFailureException("Can't find executable command file, see log");
+      throw new MojoFailureException("Executable command file not found. See log for details.");
     } else {
-      this.logDebug("Provided command file path: " + executable);
+      this.logDebug("Command file path provided: " + executable);
     }
 
     if (!Files.isExecutable(executable)) {
-      throw new MojoExecutionException("Provided file is not executable: " + executable);
+      if (this.makeExecutable) {
+        this.logOptional("Attempting to set the command file as executable: " + executable);
+        if (executable.toFile().setExecutable(true)) {
+          this.logWarn("The command file has been set as executable: " + executable);
+        } else {
+          throw new MojoFailureException(
+              "Unable to set the command file as executable: " + executable);
+        }
+      } else {
+        throw new MojoExecutionException("The command file is not executable: " + executable);
+      }
     }
 
     cliList.add(executable.toString());
@@ -190,7 +208,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       });
     }
 
-    final String environmentInfo = "Prepared process builder environment" +
+    final String environmentInfo = "Process builder environment prepared" +
         lineSeparator() + "--------------------------" + lineSeparator() +
         processBuilder.environment().entrySet().stream()
             .map(x -> String.format("\t%s=%s", x.getKey(), x.getValue()))

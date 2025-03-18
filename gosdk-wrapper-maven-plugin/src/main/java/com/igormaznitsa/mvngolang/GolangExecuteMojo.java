@@ -64,19 +64,24 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
     if (isNullOrEmpty(this.command)) {
       throw new IllegalArgumentException("Command must be provided");
     }
+
+    final List<Path> pathsToFind;
     final List<Path> foundExecutables;
     if (this.path == null || this.path.isEmpty()) {
+      pathsToFind = List.of(goSdkFolder);
       this.logDebug("Path is not defined, use GoSDK folder: " + goSdkFolder);
-      foundExecutables = findExecutable(this.command.trim(), List.of(goSdkFolder), true, true);
+      foundExecutables = findExecutable(this.command.trim(), pathsToFind, true, true);
     } else {
+      pathsToFind = this.path.stream().filter(
+          Objects::nonNull).map(File::toPath).collect(Collectors.toList());
       this.logOptional("Find in path: " +
-          this.path.stream().map(File::toString).collect(joining(File.pathSeparator)));
-      foundExecutables = findExecutable(this.command.trim(), this.path.stream().filter(
-          Objects::nonNull).map(File::toPath).collect(Collectors.toList()), false, false);
+          pathsToFind.stream().map(Path::toString).collect(joining(File.pathSeparator)));
+      foundExecutables = findExecutable(this.command.trim(), pathsToFind, false, false);
     }
+
     if (foundExecutables.isEmpty()) {
       this.logError("Can't find command '" + this.command + "' in path: "
-          + this.path.stream().map(File::toString).collect(joining(File.pathSeparator)));
+          + pathsToFind.stream().map(Path::toString).collect(joining(File.pathSeparator)));
       return null;
     } else if (foundExecutables.size() == 1) {
       final Path found = foundExecutables.get(0);
