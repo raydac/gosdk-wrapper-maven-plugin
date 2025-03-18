@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package personpb;
+option go_package = "gen/";
+
+message Person {
+  string name = 1;
+  int32 age = 2;
+}

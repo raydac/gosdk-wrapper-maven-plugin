@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.igormaznitsa</groupId>
+        <artifactId>gosdk-wrapper-maven-plugin-examples</artifactId>
+        <version>0.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>gosdk-wrapper-maven-plugin-example-protobuf</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <description>Example of Protobuf use (https://protobuf.dev)</description>
+
+    <build>
+        <finalName>proto-test{final.file.extension}</finalName>
+        <extensions>
+            <!-- Needed to provide detected os classigier -->
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.1</version>
+            </extension>
+        </extensions>
+        <plugins>
+            <plugin>
+                <!-- Load appropriate version of protoc -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-protoc</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.google.protobuf</groupId>
+                                    <artifactId>protoc</artifactId>
+                                    <version>4.30.1</version>
+                                    <classifier>${os.detected.classifier}</classifier>
+                                    <type>exe</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${go.target.temp.build}</outputDirectory>
+                                    <destFileName>protoc</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.igormaznitsa</groupId>
+                <artifactId>gosdk-wrapper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>go-get-protoc-gen-go</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>install</arg>
+                                <arg>google.golang.org/protobuf/cmd/protoc-gen-go@latest</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>go-gen-protobuf</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <command>protoc</command>
+                            <makeExecutable>true</makeExecutable>
+                            <path>
+                                <foldder>${go.target.temp.build}</foldder>
+                            </path>
+                            <args>
+                                <arg>-I=${go.target.temp.build}</arg>
+                                <arg>--go_out=${go.target.temp.build}</arg>
+                                <arg>${go.target.temp.build}/person.proto</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>go-do-test</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>test</arg>
+                                <arg>-v</arg>
+                                <arg>./...</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
