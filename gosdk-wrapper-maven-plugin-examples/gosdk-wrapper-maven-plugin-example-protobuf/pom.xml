@@ -89,6 +89,18 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>go-do-tidy</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>mod</arg>
+                                <arg>tidy</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>go-do-test</id>
                         <goals>
                             <goal>execute</goal>
