@@ -12,6 +12,7 @@
 __1.0.3 (SNAPSHOT)__
 
 - improved examples
+- added `echo` and `echoWarn` for all mojos
 - added `path` into `execute` mojo
 - refactoring
 
@@ -37,7 +38,8 @@ management, and processing. Now, this is just a Maven plugin dedicated to fetchi
 
 # Add to a Maven project
 
-The plugin doesn't provide any packaging so you should use one of regular packaging like `pom` (if you use `jar` then maven injects a lot of default calls for Java specific plugins). Just add into the maven
+The plugin doesn't provide any packaging so you should use one of regular packaging like `pom` (if you use `jar` then
+maven injects a lot of default calls for Java specific plugins). Just add into the maven
 pom.xml build section
 
 ```xml
@@ -69,7 +71,8 @@ It will automatically download GoSDK and cache it but keep in mind that the plug
 doesn't provide any extra options and environment variables just out of the box, also it doesn't make any installation
 and deploy of projects.
 
-If you use something else than `pom` packaging then during build you can see a lot of notifications from standard plugins provided by packaging, they know nothing about Go,
+If you use something else than `pom` packaging then during build you can see a lot of notifications from standard
+plugins provided by packaging, they know nothing about Go,
 so you can just move their execution into `none` phase by execution id.
 For instance
 
@@ -97,10 +100,9 @@ For instance
 </plugins>
 ```
 
-# Mojos on board
+# Documentation
 
-Take a look
-at [the description](https://html-preview.github.io/?url=https://github.com/raydac/gosdk-wrapper-maven-plugin/blob/main/mojo-doc-site/plugin-info.html)
+[Take a look at the site documentation of the plugin.](https://html-preview.github.io/?url=https://github.com/raydac/gosdk-wrapper-maven-plugin/blob/main/mojo-doc-site/index.html)
 
 ## execute
 

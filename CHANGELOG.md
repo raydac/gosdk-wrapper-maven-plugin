@@ -1,6 +1,7 @@
 # 1.0.3 (SNAPSHOT)
 
     - improved examples
+    - added `echo` and `echoWarn` for all mojos
     - added `path` into `execute` mojo
     - refactoring
 
