@@ -9,6 +9,10 @@
 
 # Changelog
 
+__1.0.4 (SNAPSHOT)__
+
+-
+
 __1.0.3 (19-mar-2025)__
 
 - improved examples
@@ -16,14 +20,6 @@ __1.0.3 (19-mar-2025)__
 - added `echo` and `echoWarn` for all mojos
 - added `path` into `execute` mojo
 - refactoring
-
-__1.0.2 (16-mar-2025)__
-
-- added `give-all-permissions` mojo
-- fixed exception under Windows (#3)
-- improved debug logging
-- disabled mass tracing log messages from Apache Http 5 Client
-- fixed wrong std output log file destination
 
 [full changelog](https://github.com/raydac/gosdk-wrapper-maven-plugin/blob/master/CHANGELOG.md)
 
