@@ -16,7 +16,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
- * Mojo loads and caching GoSDK and executing its selected tool.
+ * The mojo loads and caches the GoSDK and executes its selected tool or a custom file.
  *
  * @since 1.0.0
  */
@@ -25,17 +25,18 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
 
   /**
    * Command to be executed.
-   * By default, the mojo will be looking for the command in GoSDK folder and its bin subfolder, but it is possible to provide custom path for search through <strong>path</strong> parameter.
-   * It can be just a name without extension and in the case all executable extensions for the platform will be used to search. If it is some relative or absolute path then the path will be used.
+   * By default, the mojo will look for the command in the GoSDK folder and its bin subfolder. However, it is possible to provide a custom search path through the <strong>path</strong> parameter.
+   * It can be just a name without an extension, in which case all executable extensions for the platform will be used to search. If a relative or absolute path is provided, that path will be used.
    *
+   * @see #path
    * @since 1.0.0
    */
   @Parameter(name = "command", defaultValue = "go")
   private String command;
 
   /**
-   * List of folders to find the command executable file. <strong>It is only to find executable file defined as command and doesn't affect environment variables!</strong>
-   * In the case the GoSDK folder will be excluded from search and only the listed existing path folders will be processed for search.
+   * List of folders to find the command executable file. <strong>This is only for finding the executable file defined as the command and does not affect environment variables!</strong>
+   * In this case, the GoSDK folder will be excluded from the search, and only the listed existing path folders will be processed for the search.   *
    *
    * @since 1.0.3
    */
@@ -43,7 +44,7 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
   private List<File> path;
 
   /**
-   * Skip execution of the mojo.
+   * Skip the execution of the mojo.
    *
    * @since 1.0.0
    */
@@ -62,7 +63,7 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
     this.logOptional("GoSDK path: " + goSdkFolder);
     this.logDebug("Find command: " + this.command);
     if (isNullOrEmpty(this.command)) {
-      throw new IllegalArgumentException("Command must be provided");
+      throw new IllegalArgumentException("The command must be provided");
     }
 
     final List<Path> pathsToFind;
@@ -89,7 +90,7 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
       return found;
     } else {
       this.logError(
-          "Unexpectedly found several executable files to be recognized as the command: " +
+          "Several executable files were unexpectedly found and recognized as the command: " +
               foundExecutables);
       return null;
     }

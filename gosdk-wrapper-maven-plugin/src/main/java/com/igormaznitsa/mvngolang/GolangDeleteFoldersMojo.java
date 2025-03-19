@@ -18,7 +18,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 /**
- * Delete listed folders, it provides way to force folder delete even if it contains read only content.
+ * Delete the listed folders. This provides a way to force folder deletion even if it contains read-only content.
  *
  * @since 1.0.0
  */

@@ -31,7 +31,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwareMojo {
 
   /**
-   * Work directory. This directory will be the work one for executed process.
+   * Working directory. This directory will be used as the working directory for the executed process.
    *
    * @since 1.0.0
    */
@@ -39,7 +39,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private String workDir;
 
   /**
-   * Try to make the found command file as executable.
+   * Try to make the found command file executable.
    *
    * @since 1.0.3
    */
@@ -47,16 +47,17 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private boolean makeExecutable;
 
   /**
-   * Add internal GOPATH if there is not any already provided by environment.
+   * Automatically add the internal GOPATH to the environment if none is already provided.
    * The GOPATH will be [storeFolder]/.go_path
    *
    * @since 1.0.3
+   * @see #storeFolder
    */
   @Parameter(property = "mvn.golang.may.add.internal.gopath", name = "mayAddInternalGOPATH", defaultValue = "true")
   private boolean mayAddInternalGOPATH;
 
   /**
-   * List of environment variable to be removed. All listed variables will be removed from environment of executing process.
+   * List of environment variables to be removed. All listed variables will be removed from the executing process's environment.
    *
    * @since 1.0.0
    */
@@ -64,7 +65,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private List<String> envRemove;
 
   /**
-   * List of environment variable values to be added or replaced. All variable values will be added or replacing existing ones in environment of started process.
+   * List of environment variable values to be added or replaced. All values will be added or will replace existing ones in the environment of the started process.
    *
    * @since 1.0.0
    */
@@ -72,7 +73,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private Map<String, String> env;
 
   /**
-   * List of environment variable values to be added as first one to existing environment variables or set environment variable value if not exist.
+   * List of environment variable values to be added as the first entry to existing environment variables or set if they do not exist.
    *
    * @since 1.0.0
    */
@@ -80,7 +81,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private Map<String, String> envFirst;
 
   /**
-   * List of environment variable values to be added as last one to existing environment variables or set environment variable value if not exist.
+   * List of environment variable values to be added as the last entry to existing environment variables or set if they do not exist.
    *
    * @since 1.0.0
    */
@@ -88,7 +89,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private Map<String, String> envLast;
 
   /**
-   * Timeout for started process in milliseconds. If 0 or negative then no timeout.
+   * Timeout for the started process in milliseconds. If 0 or negative, no timeout is applied.
    *
    * @since 1.0.0
    */
@@ -96,7 +97,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private long processTimeout;
 
   /**
-   * List of command line arguments for execute command.
+   * List of command-line arguments for executing the command.
    *
    * @since 1.0.0
    */
@@ -104,7 +105,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private List<String> args;
 
   /**
-   * File to log all standard output from started process.
+   * File to log all standard output from the started process.
    *
    * @since 1.0.0
    */
@@ -112,7 +113,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private String logFileStd;
 
   /**
-   * File to log all error output from started process.
+   * File to log all error output from the started process.
    *
    * @since 1.0.0
    */
@@ -120,7 +121,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private String logFileErr;
 
   /**
-   * Expected exit status for started process. If unexpected exit status then execution failed.
+   * Expected exit status for the started process. If the exit status is unexpected, the execution is considered failed.
    *
    * @since 1.0.0
    */
@@ -128,7 +129,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private int expectedExitCode;
 
   /**
-   * Hide process output in maven log. File log continues work. Just disabling output into maven log.
+   * Hide process output in the Maven log. The file log will continue to work, but the output will be disabled in the Maven log.
    *
    * @since 1.0.0
    */

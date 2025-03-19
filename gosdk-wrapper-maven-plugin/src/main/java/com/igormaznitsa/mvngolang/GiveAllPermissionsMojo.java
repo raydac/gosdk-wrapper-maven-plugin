@@ -14,8 +14,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
 
 /**
- * Try give all permissions to files defined through file sets.
- * This mojo walks through all files and trying to provide all permissions to work with them and remove flags which can make the files non-accessible.
+ * Try to grant all permissions to the files defined through file sets.
+ * This mojo traverses all files and attempts to provide all permissions to work with them, removing any flags that could make the files non-accessible.
  *
  * @since 1.0.2
  */
@@ -23,7 +23,7 @@ import org.codehaus.plexus.util.DirectoryScanner;
 public class GiveAllPermissionsMojo extends AbstractFileProcessingMojo {
 
   /**
-   * List of file sets defining processed files.
+   * List of file sets defining the processed files.
    *
    * @since 1.0.2
    */

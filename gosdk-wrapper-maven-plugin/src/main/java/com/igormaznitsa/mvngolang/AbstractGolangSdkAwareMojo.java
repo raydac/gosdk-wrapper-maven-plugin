@@ -63,6 +63,16 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   private static final Duration DELAY_LOCK_FILE_NOTIFICATION = Duration.ofSeconds(15);
   /**
    * Section describing proxy settings.
+   * <pre>{@code
+   * <proxy>
+   *     <scheme>http</scheme>
+   *     <host>127.0.0.1</host>
+   *     <port>8085</port>
+   *     <username>johndow</username>
+   *     <password>123456</password>
+   *     <nonProxyHosts>google.com|youtube.com</nonProxyHosts>
+   * </proxy>
+   * }</pre>
    *
    * @since 1.0.0
    */
@@ -76,30 +86,31 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   @Parameter(property = "mvn.golang.disable.ssl.check", name = "disableSslCheck", defaultValue = "false")
   private boolean disableSslCheck;
   /**
-   * Hide SDK loading indicator.
+   * Hide SDK load indicator.
    *
    * @since 1.0.1
    */
   @Parameter(property = "mvn.golang.hide.load.indicator", name = "hideLoadIndicator", defaultValue = "false")
   private boolean hideLoadIndicator;
   /**
-   * The site contains GoSDK archives.
+   * The site for GoSDK archives.
    *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.sdk.site", name = "sdkSite", defaultValue = "https://storage.googleapis.com/golang/")
   private String sdkSite;
   /**
-   * Allows to define base SDK archive base name.
+   * Allows to define base SDK archive base name. If not defined then base name will be synthesized automatically.
    *
    * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.sdk.archive.base.name", name = "sdkArchiveBaseName")
   private String sdkArchiveBaseName;
   /**
-   * Folder to download SDK archives.
+   * Folder to download SDK archives. If not defined then storeFolder in use.
    *
    * @since 1.0.0
+   * @see #storeFolder
    */
   @Parameter(property = "mvn.golang.download.archive.folder", name = "downloadArchiveFolder")
   private String downloadArchiveFolder;
@@ -167,7 +178,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   @Parameter(property = "mvn.golang.sdk.archive.file.name", name = "sdkArchiveFileName")
   private String sdkArchiveFileName;
   /**
-   * Connection timeout for HTTP connections.
+   * Connection timeout for HTTP client operations.
    *
    * @since 1.0.0
    */
@@ -646,26 +657,26 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
               && !Files.isSymbolicLink(path)
               && !Files.isExecutable(path)
       ).forEach(path -> {
-            try {
-              Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path);
-              if (!permissions.contains(PosixFilePermission.OWNER_EXECUTE)) {
-                this.logTrace("Set executable flag for file: " + path);
-                permissions = new HashSet<>(permissions);
-                permissions.add(PosixFilePermission.OWNER_EXECUTE);
-              }
-              Files.setPosixFilePermissions(path, permissions);
-            } catch (UnsupportedOperationException ex) {
-              final File targetFile = path.toFile();
-              if (targetFile.setExecutable(true, true)) {
-                this.logTrace("Set executable flag for file through setExecutable: " + targetFile);
-              } else {
-                this.logTrace(
-                    "(!)Cant set executable flag for file through setExecutable: " + targetFile);
-              }
-            } catch (IOException ex) {
-              logError("Can't set execute permission for unpacked file: " + path);
-            }
-          });
+        try {
+          Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path);
+          if (!permissions.contains(PosixFilePermission.OWNER_EXECUTE)) {
+            this.logTrace("Set executable flag for file: " + path);
+            permissions = new HashSet<>(permissions);
+            permissions.add(PosixFilePermission.OWNER_EXECUTE);
+          }
+          Files.setPosixFilePermissions(path, permissions);
+        } catch (UnsupportedOperationException ex) {
+          final File targetFile = path.toFile();
+          if (targetFile.setExecutable(true, true)) {
+            this.logTrace("Set executable flag for file through setExecutable: " + targetFile);
+          } else {
+            this.logTrace(
+                "(!)Cant set executable flag for file through setExecutable: " + targetFile);
+          }
+        } catch (IOException ex) {
+          logError("Can't set execute permission for unpacked file: " + path);
+        }
+      });
     }
   }
 
