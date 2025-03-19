@@ -103,7 +103,7 @@ For instance
 
 # Documentation
 
-[Take a look at the site documentation of the plugin.](https://rawcdn.githack.com/raydac/gosdk-wrapper-maven-plugin/d7656878ca55f18fbb80a3d6fcd46d461533ca4c/mojo-doc-site/index.html)
+[Take a look at the site documentation of the plugin.](https://rawcdn.githack.com/raydac/gosdk-wrapper-maven-plugin/refs/heads/main/mojo-doc-site/index.html)
 
 ## execute
 
