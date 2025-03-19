@@ -15,7 +15,6 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.commons.compress.compressors.CompressorException;
 
 public final class ArchiveUnpacker {
   public static final ArchiveUnpacker INSTANCE = new ArchiveUnpacker();
@@ -95,7 +94,7 @@ public final class ArchiveUnpacker {
 
   public void unpackArchive(final File archiveFile, final File outputDir,
                             final UnpackListener unpackListener)
-      throws IOException, ArchiveException, CompressorException {
+      throws IOException, ArchiveException {
     if (!outputDir.exists() && !outputDir.mkdirs()) {
       throw new IOException("Failed to create output directory: " + outputDir);
     }
@@ -144,10 +143,13 @@ public final class ArchiveUnpacker {
   }
 
   public interface UnpackListener {
+    @SuppressWarnings("unused")
     void onArchiveType(ArchiveUnpacker source, ArchiveType archiveType);
 
+    @SuppressWarnings("unused")
     void onArchiveEntry(ArchiveUnpacker source, ArchiveEntry archiveEntry);
 
+    @SuppressWarnings("unused")
     void onCompleted(ArchiveUnpacker source);
   }
 }

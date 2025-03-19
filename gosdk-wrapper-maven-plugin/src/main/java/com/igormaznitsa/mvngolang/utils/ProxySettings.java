@@ -9,6 +9,7 @@ import org.apache.hc.core5.http.HttpHost;
  *
  * @since 1.0.0
  */
+@SuppressWarnings({"CanBeFinal", "UnusedAssignment"})
 public class ProxySettings {
   /**
    * Proxy host address, for instance 127.0.0.1

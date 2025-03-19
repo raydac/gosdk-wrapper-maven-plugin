@@ -424,6 +424,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     return thread;
   }
 
+  @SuppressWarnings("unused")
   @Nullable
   protected abstract Path findCommand(@Nonnull final Path goSdkFolder,
                                       @Nonnull final Path jdkFolder)

@@ -339,6 +339,7 @@ public class ApacheHttpClient5Loader {
       this.valid = valid;
     }
 
+    @SuppressWarnings("unused")
     public boolean hasData() {
       return this.hasMd5() || this.hasCrc32c();
     }
@@ -380,7 +381,8 @@ public class ApacheHttpClient5Loader {
               crc.update(buffer, 0, bytesRead);
             }
           }
-          return this.getCrc32c().equalsIgnoreCase(Long.toHexString(crc.getValue()));
+          final String thisCrc32 = this.getCrc32c();
+          return thisCrc32 != null && thisCrc32.equalsIgnoreCase(Long.toHexString(crc.getValue()));
         }
         throw new IOException("XGoogHashHeader has neither MD5 nor CRC32 data records");
       } else {

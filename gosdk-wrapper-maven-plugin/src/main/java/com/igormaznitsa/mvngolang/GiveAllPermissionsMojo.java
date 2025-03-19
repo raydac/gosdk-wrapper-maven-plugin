@@ -69,6 +69,7 @@ public class GiveAllPermissionsMojo extends AbstractFileProcessingMojo {
     return false;
   }
 
+  @SuppressWarnings("RedundantThrows")
   @Override
   public void doExecute() throws MojoExecutionException, MojoFailureException {
     if (this.isSkip()) {

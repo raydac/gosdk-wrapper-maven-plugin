@@ -33,7 +33,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -48,7 +47,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-@SuppressWarnings("ReassignedVariable")
+@SuppressWarnings({"ReassignedVariable", "CanBeFinal", "SameParameterValue"})
 public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
   public static final String SDK_NAME_PATTERN = "go%s.%s-%s%s";
@@ -564,7 +563,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
               destinationFolder));
       this.logInfo("Updating file attributes in folder: " + destinationFolder);
       this.makeExecutableFilesInFolder(destinationFolder);
-    } catch (CompressorException | ArchiveException ex) {
+    } catch (ArchiveException ex) {
       throw new IOException("Can't unpack archive for error", ex);
     } finally {
       if (!this.keepDownloadedArchive) {
@@ -756,6 +755,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
   }
 
+  @SuppressWarnings("BusyWait")
   private void unlockSdkFolder(final File lockFile) throws IOException {
     long nextNotificationTime =
         System.currentTimeMillis() + DELAY_LOCK_FILE_NOTIFICATION.toMillis();
@@ -773,6 +773,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
   }
 
+  @SuppressWarnings("BusyWait")
   private File lockSdkFolder(final File sdkCacheFolder, final String baseSdkName)
       throws IOException {
     final File lockFile = new File(sdkCacheFolder, ".lock." + baseSdkName);
