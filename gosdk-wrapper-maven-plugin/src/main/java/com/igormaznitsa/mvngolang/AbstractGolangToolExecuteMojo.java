@@ -218,6 +218,13 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       });
     }
 
+    if (!processBuilder.environment().containsKey("GOPATH") && this.mayAddInternalGOPATH) {
+      final File defaultGoPath = this.makeDefaultGoPath();
+      if (processBuilder.environment().put("GOPATH", defaultGoPath.getAbsolutePath()) == null) {
+        this.logInfo("Can't find defined GOPATH, using internal folder instead: " + defaultGoPath);
+      }
+    }
+
     final String environmentInfo = "Process builder environment prepared" +
         lineSeparator() + "--------------------------" + lineSeparator() +
         processBuilder.environment().entrySet().stream()
@@ -238,13 +245,6 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     this.logOptional("Work directory: " + workDir);
 
     processBuilder.redirectErrorStream(true);
-
-    if (!processBuilder.environment().containsKey("GOPATH") && this.mayAddInternalGOPATH) {
-      final File defaultGoPath = this.makeDefaultGoPath();
-      if (processBuilder.environment().put("GOPATH", defaultGoPath.getAbsolutePath()) == null) {
-        this.logInfo("Can't find defined GOPATH, using internal folder instead: " + defaultGoPath);
-      }
-    }
 
     final File targetOutputFile;
     final File targetErrorFile;
