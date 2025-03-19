@@ -37,6 +37,10 @@ functionality. However, since then, the Go ecosystem has changed significantly. 
 focused solely on downloading and executing GoSDK, removing features related to package installation, repository
 management, and processing. Now, this is just a Maven plugin dedicated to fetching and running Go tools.
 
+# Mojo description
+
+[The generated Maven mojo site.](https://rawcdn.githack.com/raydac/gosdk-wrapper-maven-plugin/refs/heads/main/mojo-doc-site/index.html)
+
 # Add to a Maven project
 
 The plugin doesn't provide any packaging so you should use one of regular packaging like `pom` (if you use `jar` then
@@ -100,20 +104,3 @@ For instance
     </plugin>
 </plugins>
 ```
-
-# Documentation
-
-[Take a look at the site documentation of the plugin.](https://rawcdn.githack.com/raydac/gosdk-wrapper-maven-plugin/refs/heads/main/mojo-doc-site/index.html)
-
-## execute
-
-Download a GoSDK if not cached and find a tool to be executed with provided environment variables.
-
-## delete-folders
-
-Some Go packages can't be removed by regular maven clean plugin because can contain read only files. This mojo allows to
-remove such folders.
-
-## give-all-permissions
-
-Trying to provide all permissions to files in specified folders, it works with list of Maven FileSets.
