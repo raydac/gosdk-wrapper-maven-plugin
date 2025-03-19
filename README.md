@@ -12,8 +12,9 @@
 __1.0.3 (19-mar-2025)__
 
 - improved examples
+- added default GOPATH if no any predefined (can be turned of with `mayAddInternalGOPATH`) 
 - added `echo` and `echoWarn` for all mojos
-- added `path` and `mayAddInternalGOPATH` into `execute` mojo
+- added `path` into `execute` mojo
 - refactoring
 
 __1.0.2 (16-mar-2025)__
