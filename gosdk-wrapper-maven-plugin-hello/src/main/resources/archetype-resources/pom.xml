@@ -19,7 +19,6 @@
         <go.target.folder>${project.basedir}/build</go.target.folder>
         <go.source.folder>${project.basedir}/src</go.source.folder>
         <go.resource.folder>${project.basedir}/res</go.resource.folder>
-        <go.path.folder>${project.basedir}/.gopath</go.path.folder>
         <go.gobin.folder>${project.basedir}/.bin</go.gobin.folder>
 
         <maven.install.skip>true</maven.install.skip>
@@ -58,7 +57,6 @@
                     <workDir>${go.target.temp.folder}</workDir>
                     <env>
                         <GOBIN>${go.gobin.folder}</GOBIN>
-                        <GOPATH>${go.path.folder}</GOPATH>
                     </env>
                     <envLast>
                         <PATH>${path.separator}${go.target.temp.folder}</PATH>
@@ -89,7 +87,6 @@
                             <folders>
                                 <folder>${go.gobin.folder}</folder>
                                 <folder>${go.target.temp.folder}</folder>
-                                <folder>${go.path.folder}</folder>
                                 <folder>${go.target.folder}</folder>
                             </folders>
                         </configuration>

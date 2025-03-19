@@ -1,4 +1,4 @@
-# 1.0.3 (SNAPSHOT)
+# 1.0.3 (19-mar-2025)
 
     - improved examples
     - added `echo` and `echoWarn` for all mojos
