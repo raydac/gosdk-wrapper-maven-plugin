@@ -37,6 +37,16 @@ management, and processing. Now, this is just a Maven plugin dedicated to fetchi
 
 [The generated Maven mojo site.](https://rawcdn.githack.com/raydac/gosdk-wrapper-maven-plugin/refs/heads/main/mojo-doc-site/index.html)
 
+# Examples
+
+- [Hello World with conversion with test coverage result as JUnit](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-hello-world)
+- [A terminal application with CLUI](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-clui)
+- [A GUI application with Fyne](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-fyne)
+- [A terminal application with GoTerm](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-goterm)
+- [A simple shooter game with Oak](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-oak-shooter)
+- [Simple Protobuf based application](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-protobuf)
+- [Build of NES emulator](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-exanple-nes)
+
 # Add to a Maven project
 
 The plugin doesn't provide any packaging so you should use one of regular packaging like `pom` (if you use `jar` then
