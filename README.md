@@ -16,7 +16,7 @@ __1.0.4 (SNAPSHOT)__
 __1.0.3 (19-mar-2025)__
 
 - improved examples
-- added default GOPATH if no any predefined (can be turned of with `mayAddInternalGOPATH`) 
+- added default GOPATH if no any predefined (can be turned of with `mayAddInternalGOPATH`)
 - added `echo` and `echoWarn` for all mojos
 - added `path` into `execute` mojo
 - refactoring
@@ -32,6 +32,21 @@ Originally, there was a project called [mvn-golang](https://github.com/raydac/mv
 functionality. However, since then, the Go ecosystem has changed significantly. I decided to create a simpler plugin
 focused solely on downloading and executing GoSDK, removing features related to package installation, repository
 management, and processing. Now, this is just a Maven plugin dedicated to fetching and running Go tools.
+
+# How to build?
+
+Just clone the project and use [Maven](https://maven.apache.org).
+Go into the project folder and execute maven command
+
+```bash
+mvn clean install
+```
+
+if you want to build examples, use
+
+```bash
+mvn clean install -Pexamples
+```
 
 # Mojo description
 

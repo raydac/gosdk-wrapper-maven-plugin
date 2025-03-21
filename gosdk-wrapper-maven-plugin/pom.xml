@@ -216,7 +216,6 @@
                         <configuration>
                             <rules>
                                 <banCircularDependencies/>
-                                <reactorModuleConvergence/>
                                 <dependencyConvergence>
                                     <excludedScopes>
                                         <scope>provided</scope>

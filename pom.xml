@@ -64,7 +64,7 @@
 
     <profiles>
         <profile>
-            <id>start-examples</id>
+            <id>examples</id>
             <modules>
                 <module>gosdk-wrapper-maven-plugin-examples</module>
             </modules>
