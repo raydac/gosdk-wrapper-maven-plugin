@@ -11,7 +11,7 @@
 
 __1.0.4 (SNAPSHOT)__
 
--
+- minor refactoring
 
 __1.0.3 (19-mar-2025)__
 
