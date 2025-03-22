@@ -22,15 +22,14 @@
                 <artifactId>gosdk-wrapper-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>go-get-tetra3d</id>
+                        <id>go-mod-tidy</id>
                         <goals>
                             <goal>execute</goal>
                         </goals>
                         <configuration>
                             <args>
-                                <arg>get</arg>
-                                <arg>github.com/solarlune/tetra3d</arg>
-                                <arg>github.com/hajimehoshi/ebiten/v2</arg>
+                                <arg>mod</arg>
+                                <arg>tidy</arg>
                             </args>
                         </configuration>
                     </execution>
