@@ -63,6 +63,7 @@ mvn clean install -Pexamples
 - [Build of NES emulator](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-exanple-nes)
 - [Tetra3D engine example](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-tetra3d)
 - [Ebitengine Flappy game example](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-ebitengine)
+- [Primitive image generator example](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-primitive)
 
 # Add to a Maven project
 
