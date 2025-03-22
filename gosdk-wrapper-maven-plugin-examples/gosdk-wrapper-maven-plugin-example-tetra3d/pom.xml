@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.igormaznitsa</groupId>
+        <artifactId>gosdk-wrapper-maven-plugin-examples</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>gosdk-wrapper-maven-plugin-example-tetra3d</artifactId>
+    <packaging>pom</packaging>
+
+    <description>Example of usage Tetra3D engine (https://github.com/SolarLune/tetra3d).</description>
+
+    <build>
+        <finalName>tetra3d${final.file.extension}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>com.igormaznitsa</groupId>
+                <artifactId>gosdk-wrapper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>go-get-glui</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>get</arg>
+                                <arg>github.com/solarlune/tetra3d</arg>
+                                <arg>github.com/hajimehoshi/ebiten/v2</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>go-build</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>build</arg>
+                                <arg>-o</arg>
+                                <arg>
+                                    ${go.target.folder}${file.separator}${project.build.finalName}
+                                </arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -37,6 +37,7 @@
         <module>gosdk-wrapper-maven-plugin-example-gwt</module>
         <module>gosdk-wrapper-maven-plugin-example-oak-shooter</module>
         <module>gosdk-wrapper-maven-plugin-example-protobuf</module>
+        <module>gosdk-wrapper-maven-plugin-example-tetra3d</module>
     </modules>
 
     <name>Mvn Golang plugin tests</name>

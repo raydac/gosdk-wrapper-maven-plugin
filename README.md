@@ -61,6 +61,7 @@ mvn clean install -Pexamples
 - [A simple shooter game with Oak](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-oak-shooter)
 - [Simple Protobuf based application](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-protobuf)
 - [Build of NES emulator](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-exanple-nes)
+- [Tetra3D engine example](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-tetra3d)
 
 # Add to a Maven project
 
