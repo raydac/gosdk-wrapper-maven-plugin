@@ -9,7 +9,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>backend</artifactId>
+    <artifactId>gosdk-wrapper-maven-plugin-example-gwt-backend</artifactId>
     <packaging>pom</packaging>
 
     <description>Backend part of the GoLang+GWT example, it implements the server side.</description>
