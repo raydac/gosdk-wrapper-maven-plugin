@@ -60,7 +60,7 @@ public class GolangExecuteMojo extends AbstractGolangToolExecuteMojo {
   @Nullable
   protected Path findCommand(@Nonnull final Path goSdkFolder, @Nonnull final Path jdkFolder)
       throws IOException {
-    this.logOptional("GoSDK path: " + goSdkFolder);
+    this.logInfo("GoSDK folder: " + goSdkFolder);
     this.logDebug("Find command: " + this.command);
     if (isNullOrEmpty(this.command)) {
       throw new IllegalArgumentException("The command must be provided");
