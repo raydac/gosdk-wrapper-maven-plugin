@@ -62,6 +62,7 @@ mvn clean install -Pexamples
 - [Simple Protobuf based application](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-protobuf)
 - [Build of NES emulator](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-exanple-nes)
 - [Tetra3D engine example](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-tetra3d)
+- [Ebitengine Flappy game example](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-ebitengine)
 
 # Add to a Maven project
 

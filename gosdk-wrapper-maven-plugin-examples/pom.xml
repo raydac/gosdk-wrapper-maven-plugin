@@ -38,6 +38,7 @@
         <module>gosdk-wrapper-maven-plugin-example-oak-shooter</module>
         <module>gosdk-wrapper-maven-plugin-example-protobuf</module>
         <module>gosdk-wrapper-maven-plugin-example-tetra3d</module>
+        <module>gosdk-wrapper-maven-plugin-example-ebitengine</module>
     </modules>
 
     <name>Mvn Golang plugin tests</name>

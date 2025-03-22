@@ -22,7 +22,7 @@
                 <artifactId>gosdk-wrapper-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>go-get-glui</id>
+                        <id>go-get-tetra3d</id>
                         <goals>
                             <goal>execute</goal>
                         </goals>
