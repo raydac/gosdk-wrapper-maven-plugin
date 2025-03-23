@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.igormaznitsa</groupId>
+        <artifactId>gosdk-wrapper-maven-plugin-examples</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>gosdk-wrapper-maven-plugin-example-preprocessing</artifactId>
+    <packaging>pom</packaging>
+
+    <description>Example of preprocessing with JCP (https://github.com/raydac/java-comment-preprocessor)</description>
+
+    <build>
+        <finalName>preprocessed${final.file.extension}</finalName>
+        <plugins>
+            <!-- turn off default merge of resource and source-->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>merge-src-res-as-temp-build</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>generate-build-timestamp</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create-timestamp</goal>
+                        </goals>
+                        <configuration>
+                            <timestampFormat>yyMMddHHmmss</timestampFormat>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.igormaznitsa</groupId>
+                <artifactId>jcp</artifactId>
+                <version>7.1.2</version>
+                <executions>
+                    <execution>
+                        <id>preprocess-go-sources</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>preprocess</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <extensions>
+                        <ext>go</ext>
+                    </extensions>
+                    <excludeExtensions>
+                        <ext>txt</ext>
+                        <ext>png</ext>
+                    </excludeExtensions>
+                    <keepLines>false</keepLines>
+                    <clearTarget>true</clearTarget>
+                    <target>${go.target.temp.build}</target>
+                    <sources>
+                        <source>${go.source.folder}</source>
+                    </sources>
+                    <vars>
+                        <timeStamp>${timestamp}</timeStamp>
+                        <txtMsg>Iteration number is</txtMsg>
+                    </vars>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.igormaznitsa</groupId>
+                <artifactId>gosdk-wrapper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>go-build</id>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>build</arg>
+                                <arg>-o</arg>
+                                <arg>${go.target.folder}${file.separator}${project.build.finalName}</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

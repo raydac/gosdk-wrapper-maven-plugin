@@ -40,6 +40,7 @@
         <module>gosdk-wrapper-maven-plugin-example-tetra3d</module>
         <module>gosdk-wrapper-maven-plugin-example-ebitengine</module>
         <module>gosdk-wrapper-maven-plugin-example-primitive</module>
+        <module>gosdk-wrapper-maven-plugin-example-preprocessing</module>
     </modules>
 
     <name>Mvn Golang plugin tests</name>
@@ -112,7 +113,7 @@
                         <artifactId>maven-resources-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>copy-resources-to-temp-build</id>
+                                <id>merge-src-res-as-temp-build</id>
                                 <goals>
                                     <goal>copy-resources</goal>
                                 </goals>

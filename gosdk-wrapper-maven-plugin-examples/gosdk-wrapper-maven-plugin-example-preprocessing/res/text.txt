@@ -1,0 +1,2 @@
+The text is injected by preprocesseor from an external resource UTF8 text file!
+Он содержит и странные русские буквы (для непосвященных) и даже Ё!
