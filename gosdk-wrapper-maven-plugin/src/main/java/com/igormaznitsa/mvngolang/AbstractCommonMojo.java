@@ -8,6 +8,7 @@ import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
 
 public abstract class AbstractCommonMojo extends AbstractMojo {
@@ -20,6 +21,8 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
   protected MavenSession session;
   @Parameter(defaultValue = "${mojoExecution}", readonly = true, required = true)
   protected MojoExecution execution;
+  @Parameter(readonly = true, defaultValue = "${project}", required = true)
+  protected MavenProject project;
 
   protected static final String DEFAULT_GO_PATH_FOLDER = ".go_path";
 
