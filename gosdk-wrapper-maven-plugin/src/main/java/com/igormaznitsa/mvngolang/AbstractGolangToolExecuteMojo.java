@@ -363,6 +363,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
           throw new MojoFailureException("Detected process timeout");
         }
       }
+      Thread.sleep(150L); // wait to read whole output buffers after exit
     } catch (InterruptedException ex) {
       this.logWarn("Process interrupted");
       Thread.currentThread().interrupt();
