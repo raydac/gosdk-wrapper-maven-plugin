@@ -56,6 +56,7 @@ mvn clean install -Pexamples
 
 - [Hello World with conversion with test coverage result as JUnit](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-hello-world)
 - [Example of preprocessing with JCP](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-preprocessing)
+- [Use a library shared through Maven repository](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-repository)
 - [A terminal application with CLUI](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-clui)
 - [A GUI application with Fyne](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-fyne)
 - [A terminal application with GoTerm](gosdk-wrapper-maven-plugin-examples/gosdk-wrapper-maven-plugin-example-goterm)

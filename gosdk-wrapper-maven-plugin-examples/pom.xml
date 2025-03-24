@@ -41,6 +41,7 @@
         <module>gosdk-wrapper-maven-plugin-example-ebitengine</module>
         <module>gosdk-wrapper-maven-plugin-example-primitive</module>
         <module>gosdk-wrapper-maven-plugin-example-preprocessing</module>
+        <module>gosdk-wrapper-maven-plugin-example-repository</module>
     </modules>
 
     <name>Mvn Golang plugin tests</name>
