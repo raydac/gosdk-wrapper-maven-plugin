@@ -48,7 +48,7 @@
                                     </includes>
                                     <fileMappers>
                                         <org.codehaus.plexus.components.io.filemappers.RegExpFileMapper>
-                                            <pattern>^(src|res)/(.*)</pattern>
+                                            <pattern>^(src|res)/(.+)</pattern>
                                             <replacement>$2</replacement>
                                         </org.codehaus.plexus.components.io.filemappers.RegExpFileMapper>
                                     </fileMappers>
