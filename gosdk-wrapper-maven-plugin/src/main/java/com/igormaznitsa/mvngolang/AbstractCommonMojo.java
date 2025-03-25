@@ -125,5 +125,15 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
     this.doExecute();
   }
 
+  protected void sleep(final long milliseconds) {
+    try {
+      this.logDebug("Do sleep for " + milliseconds + "ms");
+      Thread.sleep(milliseconds);
+    } catch (InterruptedException ex) {
+      this.logWarn("Detected thread interruption");
+      Thread.currentThread().interrupt();
+    }
+  }
+
   public abstract void doExecute() throws MojoExecutionException, MojoFailureException;
 }

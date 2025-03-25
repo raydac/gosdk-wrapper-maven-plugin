@@ -3,7 +3,6 @@ package com.igormaznitsa.mvngolang;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.System.out;
-import static java.lang.Thread.sleep;
 import static java.nio.file.Files.isRegularFile;
 
 import com.igormaznitsa.mvngolang.utils.ApacheHttpClient5Loader;
@@ -764,12 +763,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
         this.logWarn("Still can't unlock folder and remove file: " + lockFile);
         nextNotificationTime = System.currentTimeMillis() + DELAY_LOCK_FILE_NOTIFICATION.toMillis();
       }
-      try {
-        sleep(LOCK_FILE_SLEEP_MS);
-      } catch (InterruptedException ex) {
-        Thread.currentThread().interrupt();
-        throw new IOException("Unlock folder operation is interrupted", ex);
-      }
+      this.sleep(LOCK_FILE_SLEEP_MS);
     }
   }
 
@@ -787,12 +781,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
           nextNotificationTime =
               System.currentTimeMillis() + DELAY_LOCK_FILE_NOTIFICATION.toMillis();
         }
-        try {
-          sleep(LOCK_FILE_SLEEP_MS);
-        } catch (InterruptedException ex) {
-          Thread.currentThread().interrupt();
-          throw new IOException("Lock folder operation is interrupted", ex);
-        }
+        this.sleep(LOCK_FILE_SLEEP_MS);
       }
     }
     return lockFile;

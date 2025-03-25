@@ -39,6 +39,14 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   private String workDir;
 
   /**
+   * Delay in milliseconds after process exit detection to collect internal buffers before processing threads interruptions.
+   *
+   * @since 1.0.5
+   */
+  @Parameter(name = "processExitLingerMs", defaultValue = "100")
+  private long processExitLingerMs;
+
+  /**
    * Try to make the found command file executable.
    *
    * @since 1.0.3
@@ -50,8 +58,8 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
    * Automatically add the internal GOPATH to the environment if none is already provided.
    * The GOPATH will be [storeFolder]/.go_path
    *
-   * @since 1.0.3
    * @see #storeFolder
+   * @since 1.0.3
    */
   @Parameter(property = "mvn.golang.may.add.internal.gopath", name = "mayAddInternalGOPATH", defaultValue = "true")
   private boolean mayAddInternalGOPATH;
@@ -139,7 +147,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
   protected void ensureParentFolderExists(@Nonnull final File file) throws MojoExecutionException {
     final File parent = file.getParentFile();
     if (parent == null) {
-      throw new MojoExecutionException("Can't find parent folder for file: " + file);
+      throw new MojoExecutionException("Unable to find the parent folder for the file: " + file);
     }
     if (parent.isDirectory()) {
       return;
@@ -159,7 +167,8 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     final Path executable = this.findCommand(goSdkFolder, Path.of(System.getProperty("java.home")));
 
     if (executable == null) {
-      throw new MojoFailureException("Executable command file not found. See log for details.");
+      throw new MojoFailureException(
+          "Executable command file not found. Check the log for details.");
     } else {
       this.logDebug("Command file path provided: " + executable);
     }
@@ -183,7 +192,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       cliList.addAll(args);
     }
 
-    this.logInfo("Prepared command line arguments: " + cliList);
+    this.logInfo("Command line arguments prepared: " + cliList);
 
     final ProcessBuilder processBuilder = new ProcessBuilder(cliList);
 
@@ -221,11 +230,11 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     if (!processBuilder.environment().containsKey("GOPATH") && this.mayAddInternalGOPATH) {
       final File defaultGoPath = this.makeDefaultGoPath();
       if (processBuilder.environment().put("GOPATH", defaultGoPath.getAbsolutePath()) == null) {
-        this.logInfo("Can't find defined GOPATH, using internal folder instead: " + defaultGoPath);
+        this.logInfo("GOPATH not found; defaulting to internal folder: " + defaultGoPath);
       }
     }
 
-    final String environmentInfo = "Process builder environment prepared" +
+    final String environmentInfo = "Process builder environment is set up" +
         lineSeparator() + "--------------------------" + lineSeparator() +
         processBuilder.environment().entrySet().stream()
             .map(x -> String.format("\t%s=%s", x.getKey(), x.getValue()))
@@ -239,7 +248,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
 
     final File workDirectory = new File(this.workDir);
     if (!workDirectory.isDirectory()) {
-      throw new MojoFailureException("Can't find work directory: " + workDirectory);
+      throw new MojoFailureException("Unable to find the work directory: " + workDirectory);
     }
     processBuilder.directory(workDirectory);
     this.logOptional("Work directory: " + workDir);
@@ -254,7 +263,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     } else {
       targetErrorFile = new File(this.logFileErr.trim());
       this.ensureParentFolderExists(targetErrorFile);
-      this.logInfo("Redirect process error output to: " + targetErrorFile);
+      this.logInfo("Redirecting process error output to: " + targetErrorFile);
     }
 
     if (isNullOrEmpty(this.logFileStd)) {
@@ -262,7 +271,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     } else {
       targetOutputFile = new File(this.logFileStd.trim());
       this.ensureParentFolderExists(targetOutputFile);
-      this.logInfo("Redirect process standard output to: " + targetOutputFile);
+      this.logInfo("Redirecting process standard output to: " + targetOutputFile);
     }
 
     final String localId =
@@ -291,7 +300,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
                         (line + (eol ? lineSeparator() : "")).getBytes(Charset.defaultCharset()));
                     outputFile.flush();
                   } catch (IOException ex) {
-                    this.logError("Can't append record to log stderr file: " + ex);
+                    this.logError("Unable to append record to log stderr file.: " + ex);
                   } finally {
                     stdErrLock.unlock();
                   }
@@ -310,7 +319,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
                         (line + (eol ? lineSeparator() : "")).getBytes(Charset.defaultCharset()));
                     outputFile.flush();
                   } catch (IOException ex) {
-                    this.logError("Can't append record to log stdout file: " + ex);
+                    this.logError("Unable to append record to log stdout file: " + ex);
                   } finally {
                     stdOutLock.unlock();
                   }
@@ -341,7 +350,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
           )
       );
     } catch (Exception ex) {
-      throw new MojoFailureException("Can't start process for exception", ex);
+      throw new MojoFailureException("Unable to start process due to exception.", ex);
     }
 
     if (this.hideProcessOutput) {
@@ -358,17 +367,17 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
         if (result) {
           exitCode = process.exitValue();
         } else {
-          this.logWarn("Destroying started process for timeout");
+          this.logWarn("Terminating the process due to timeout.");
           process.destroy();
-          throw new MojoFailureException("Detected process timeout");
+          throw new MojoFailureException("Process timeout detected.");
         }
       }
-      Thread.sleep(150L); // wait to read whole output buffers after exit
     } catch (InterruptedException ex) {
       this.logWarn("Process interrupted");
       Thread.currentThread().interrupt();
       return;
     } finally {
+      this.sleep(this.processExitLingerMs);
       stdOutLock.lock();
       try {
         threadStdOut.interrupt();
@@ -380,6 +389,16 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
         threadStdErr.interrupt();
       } finally {
         stdErrLock.unlock();
+      }
+      try {
+        this.logDebug("Waiting for end of log collecting threads");
+        threadStdOut.join(5000L);
+        threadStdErr.join(5000L);
+      } catch (IllegalThreadStateException ex) {
+        this.logWarn("Can't close std reading threads during 5 seconds");
+      } catch (InterruptedException ex) {
+        this.logError("Detected thread interruption");
+        Thread.currentThread().interrupt();
       }
     }
 
