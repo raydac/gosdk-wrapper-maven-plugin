@@ -50,7 +50,7 @@ mvn clean install -Pexamples
 
 # Mojo description
 
-[The generated Maven mojo site.](https://rawcdn.githack.com/raydac/gosdk-wrapper-maven-plugin/refs/heads/main/mojo-doc-site/index.html)
+[The generated Maven mojo site.](https://raydac.github.io/gosdk-wrapper-maven-plugin-site/index.html)
 
 # Examples
 
