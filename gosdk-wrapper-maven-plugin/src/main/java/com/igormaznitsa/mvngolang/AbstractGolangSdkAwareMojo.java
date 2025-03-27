@@ -118,8 +118,8 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   /**
    * Folder to download SDK archives. If not defined then storeFolder in use.
    *
-   * @since 1.0.0
    * @see #storeFolder
+   * @since 1.0.0
    */
   @Parameter(property = "mvn.golang.download.archive.folder", name = "downloadArchiveFolder")
   private String downloadArchiveFolder;
@@ -153,7 +153,13 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   private String sdkDownloadUrl;
 
   /**
-   * Maven artifact id to load GoSDK archive.
+   * Maven artifact id to load GoSDK archive as an artifact from current Maven repository. It has the highest priority during SDK download.
+   * Expected format groupId:artifactId:version[:type[:classifier]]
+   *
+   * <p>Example usage:</p>
+   * <pre>{@code
+   *   <sdkArtifactId>com.sdk.go:go-sdk:1.24.1</sdkArtifactId>
+   * }</pre>
    *
    * @since 1.0.4
    */
@@ -226,12 +232,13 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
   /**
    * This is the path to the local maven {@code repository}.
+   *
    * @since @since 1.0.4
    */
   @Parameter(
-          required = true,
-          readonly = true,
-          property = "localRepository"
+      required = true,
+      readonly = true,
+      property = "localRepository"
   )
   private ArtifactRepository localRepository;
 
@@ -241,9 +248,9 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    * @since @since 1.0.4
    */
   @Parameter(
-          required = true,
-          readonly = true,
-          defaultValue = "${project.remoteArtifactRepositories}"
+      required = true,
+      readonly = true,
+      defaultValue = "${project.remoteArtifactRepositories}"
   )
   private List<ArtifactRepository> remoteRepositories;
 
@@ -535,13 +542,17 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
             ensureSafeFileName(fileName));
     try {
       Path sdkPath;
-      if (!isNullOrEmpty(this.sdkArtifactId)) {
-        sdkPath = downloadFromArtifactId(this.sdkArtifactId);
-      } else {
+      if (isNullOrEmpty(this.sdkArtifactId)) {
+        this.logInfo("Retrieving GoSDK from URL: " + sdkArchiveUrl);
         downloadFromUrl(sdkArchiveUrl, tempArchivePath);
         sdkPath = tempArchivePath;
+      } else {
+        final String trimmedSdkArtifactId = this.sdkArtifactId.trim();
+        this.logWarn("Retrieving artifact from the Maven repository: " + trimmedSdkArtifactId);
+        sdkPath = this.downloadFromArtifactId(trimmedSdkArtifactId);
+        this.logOptional("SDK artifact archive location: " + sdkPath);
       }
-      extractArchiveToDestination(sdkPath, destinationFolder);
+      this.extractArchiveToDestination(sdkPath, destinationFolder);
       this.logInfo("Updating file attributes in folder: " + destinationFolder);
       this.makeExecutableFilesInFolder(destinationFolder);
     } finally {
@@ -559,11 +570,12 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
   }
 
-  private void downloadFromUrl(String sdkArchiveUrl, Path tempArchivePath) throws IOException, MojoFailureException {
+  private void downloadFromUrl(String sdkArchiveUrl, Path tempArchivePath)
+      throws IOException, MojoFailureException {
     final AtomicInteger lastProgress = new AtomicInteger(-1);
     final Header[] headers = ApacheHttpClient5Loader.loadResource("GET",
         makeHttpClient(),
-            sdkArchiveUrl,
+        sdkArchiveUrl,
         (loaded, size, progress) -> {
           if (progress >= 0 && lastProgress.get() != progress) {
             lastProgress.set(progress);
@@ -621,7 +633,8 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
   }
 
-  private void extractArchiveToDestination(Path tempArchivePath, Path destinationFolder) throws IOException {
+  private void extractArchiveToDestination(Path tempArchivePath, Path destinationFolder)
+      throws IOException {
     try {
       this.logInfo("Unpacking archive into: " + destinationFolder);
       final AtomicInteger counter = new AtomicInteger();
@@ -636,7 +649,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
             @Override
             public void onArchiveEntry(ArchiveUnpacker source, ArchiveEntry archiveEntry) {
               logTrace("Archive entry: " + archiveEntry.getName() + " (" +
-                      (archiveEntry.isDirectory() ? "" : archiveEntry.getSize()) + ')');
+                  (archiveEntry.isDirectory() ? "" : archiveEntry.getSize()) + ')');
               counter.incrementAndGet();
             }
 
@@ -646,16 +659,15 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
             }
           });
       this.logInfo(
-              String.format("Archive successfully unpacked, detected %d items: %s", counter.get(),
-                      destinationFolder));
+          String.format("Archive successfully unpacked, detected %d items: %s", counter.get(),
+              destinationFolder));
     } catch (ArchiveException ex) {
       throw new IOException("Can't unpack archive for error", ex);
     }
   }
 
   private Path downloadFromArtifactId(String artifactId) throws IOException {
-    Artifact artifact = createDependencyArtifact(artifactId);
-    return resolveBinaryArtifact(artifact);
+    return this.resolveBinaryArtifact(this.createDependencyArtifact(artifactId));
   }
 
   /**
@@ -669,9 +681,9 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     final String[] parts = artifactSpec.split(":");
     if (parts.length < 3 || parts.length > 5) {
       throw new IOException(
-              "Invalid artifact specification format"
-                      + ", expected: groupId:artifactId:version[:type[:classifier]]"
-                      + ", actual: " + artifactSpec);
+          "Invalid artifact specification format"
+              + ", expected: groupId:artifactId:version[:type[:classifier]]"
+              + ", actual: " + artifactSpec);
     }
     final String type = parts.length >= 4 ? parts[3] : "exe";
     final String classifier = parts.length == 5 ? parts[4] : null;
@@ -679,11 +691,11 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   }
 
   private Artifact createDependencyArtifact(
-          final String groupId,
-          final String artifactId,
-          final String version,
-          final String type,
-          final String classifier
+      final String groupId,
+      final String artifactId,
+      final String version,
+      final String type,
+      final String classifier
   ) {
     Dependency dependency = new Dependency();
 
@@ -697,39 +709,38 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   }
 
   private Path resolveBinaryArtifact(final Artifact artifact) throws IOException {
-    final ArtifactResolutionResult result;
     final ArtifactResolutionRequest request = new ArtifactResolutionRequest()
-            .setArtifact(project.getArtifact())
-            .setResolveRoot(false)
-            .setResolveTransitively(false)
-            .setArtifactDependencies(singleton(artifact))
-            .setManagedVersionMap(emptyMap())
-            .setLocalRepository(localRepository)
-            .setRemoteRepositories(remoteRepositories)
-            .setOffline(session.isOffline())
-            .setForceUpdate(session.getRequest().isUpdateSnapshots())
-            .setServers(session.getRequest().getServers())
-            .setMirrors(session.getRequest().getMirrors())
-            .setProxies(session.getRequest().getProxies());
+        .setArtifact(project.getArtifact())
+        .setResolveRoot(false)
+        .setResolveTransitively(false)
+        .setArtifactDependencies(singleton(artifact))
+        .setManagedVersionMap(emptyMap())
+        .setLocalRepository(localRepository)
+        .setRemoteRepositories(remoteRepositories)
+        .setOffline(session.isOffline())
+        .setForceUpdate(session.getRequest().isUpdateSnapshots())
+        .setServers(session.getRequest().getServers())
+        .setMirrors(session.getRequest().getMirrors())
+        .setProxies(session.getRequest().getProxies());
 
-    result = repositorySystem.resolve(request);
-
+    final ArtifactResolutionResult result = repositorySystem.resolve(request);
     try {
-      resolutionErrorHandler.throwErrors(request, result);
+      this.resolutionErrorHandler.throwErrors(request, result);
     } catch (final ArtifactResolutionException e) {
       throw new IOException("Unable to resolve artifact: " + e.getMessage(), e);
     }
 
     final Set<Artifact> artifacts = result.getArtifacts();
-
+    this.logDebug("All resolved artifacts: " + artifacts);
     if (artifacts == null || artifacts.isEmpty()) {
-      throw new IOException("Unable to resolve artifact " + artifact);
+      throw new IOException("Unable to resolve artifact: " + artifact);
     }
 
-    final Artifact resolvedBinaryArtifact = artifacts.iterator().next();
-    if (getLog().isDebugEnabled()) {
-      getLog().debug("Resolved artifact: " + resolvedBinaryArtifact);
+    if (artifacts.size() > 1) {
+      this.logWarn("Multiple artifacts detected: " + artifacts);
     }
+    final Artifact resolvedBinaryArtifact = artifacts.iterator().next();
+    this.logDebug("Resolved artifact: " + resolvedBinaryArtifact);
 
     return resolvedBinaryArtifact.getFile().toPath();
   }
@@ -909,7 +920,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
   }
 
-  @SuppressWarnings("BusyWait")
   private void unlockSdkFolder(final File lockFile) throws IOException {
     long nextNotificationTime =
         System.currentTimeMillis() + DELAY_LOCK_FILE_NOTIFICATION.toMillis();
@@ -922,7 +932,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
   }
 
-  @SuppressWarnings("BusyWait")
   private File lockSdkFolder(final File sdkCacheFolder, final String baseSdkName)
       throws IOException {
     final File lockFile = new File(sdkCacheFolder, ".lock." + baseSdkName);
