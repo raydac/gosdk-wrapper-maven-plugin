@@ -1,5 +1,6 @@
 # 1.0.4 (SNAPSHOT)
 
+    - added way to load GoSDK from Maven repository as an artifact, parameter `sdkArtifactId`
     - minor refactoring
 
 # 1.0.3 (19-mar-2025)
