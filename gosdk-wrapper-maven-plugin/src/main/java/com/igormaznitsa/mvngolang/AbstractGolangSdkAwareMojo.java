@@ -4,6 +4,8 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.System.out;
 import static java.nio.file.Files.isRegularFile;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singleton;
 
 import com.igormaznitsa.mvngolang.utils.ApacheHttpClient5Loader;
 import com.igormaznitsa.mvngolang.utils.ArchiveUnpacker;
@@ -36,9 +38,18 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.core5.http.Header;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
+import org.apache.maven.artifact.resolver.ResolutionErrorHandler;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Proxy;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -140,6 +151,14 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.sdk.download.url", name = "sdkDownloadUrl")
   private String sdkDownloadUrl;
+
+  /**
+   * Maven artifact id to load GoSDK archive.
+   *
+   * @since 1.0.4
+   */
+  @Parameter(property = "mvn.golang.sdk.artifact.id", name = "sdkArtifactId")
+  private String sdkArtifactId;
   /**
    * GoSDK version.
    *
@@ -196,6 +215,46 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.sdk.archive.file.auto.extension", name = "sdkArchiveFileAutoExtension", defaultValue = "true")
   private boolean sdkArchiveFileAutoExtension;
+
+  /**
+   * A factory for Maven artifact definitions (former ArtifactFactory).
+   *
+   * @since 1.0.4
+   */
+  @Component
+  private RepositorySystem repositorySystem;
+
+  /**
+   * This is the path to the local maven {@code repository}.
+   * @since @since 1.0.4
+   */
+  @Parameter(
+          required = true,
+          readonly = true,
+          property = "localRepository"
+  )
+  private ArtifactRepository localRepository;
+
+  /**
+   * Remote repositories for artifact resolution.
+   *
+   * @since @since 1.0.4
+   */
+  @Parameter(
+          required = true,
+          readonly = true,
+          defaultValue = "${project.remoteArtifactRepositories}"
+  )
+  private List<ArtifactRepository> remoteRepositories;
+
+  /**
+   * A component that handles resolution errors.
+   *
+   * @since @since 1.0.4
+   */
+  @Component
+  private ResolutionErrorHandler resolutionErrorHandler;
+
 
   private static String makeBaseSdkName(
       final String sdkVersion,
@@ -475,66 +534,95 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
         ".tmp_" + Long.toString(System.currentTimeMillis(), 25).toUpperCase(Locale.ENGLISH) + '_' +
             ensureSafeFileName(fileName));
     try {
-      final AtomicInteger lastProgress = new AtomicInteger(-1);
-      final Header[] headers = ApacheHttpClient5Loader.loadResource("GET",
-          makeHttpClient(),
-          sdkArchiveUrl,
-          (loaded, size, progress) -> {
-            if (progress >= 0 && lastProgress.get() != progress) {
-              lastProgress.set(progress);
-              if (!this.session.isParallel() || this.hideLoadIndicator) {
-                final String sizeText = (size / 1024L) + "Mb";
-                final String loadedText = (loaded / 1024L) + "Mb";
-                printCliProgressBar("Loading GoSDK:", ' ' + loadedText + '/' + sizeText,
-                    progress, 100, 5);
-                if (progress == 100) {
-                  System.out.println();
-                }
-              }
-            }
-          },
-          h -> {
-            this.logDebug("Opening output stream for archive file:" + tempArchivePath);
-            try {
-              return Files.newOutputStream(tempArchivePath);
-            } catch (IOException ex) {
-              throw new IllegalStateException(
-                  "IOError during open stream for temporary file: " + tempArchivePath, ex);
-            }
-          },
-          x -> 16 * 1024 * 1024,
-          SDK_ARCHIVE_MIMES
-      );
-      this.logDebug("Headers: " + Arrays.toString(headers));
-      this.logInfo("Successfully downloaded archive file: " + tempArchivePath);
-
-      if (isNullOrEmpty(this.expectedArchiveMd5)) {
-        final ApacheHttpClient5Loader.XGoogHashHeader xgoogHeader =
-            new ApacheHttpClient5Loader.XGoogHashHeader(headers);
-        if (xgoogHeader.isValid()) {
-          this.logInfo("Detected XGoogHashHeader, validating checksum for downloaded archive");
-          try (final InputStream fileInputStream = Files.newInputStream(tempArchivePath)) {
-            if (xgoogHeader.isDataOk(fileInputStream)) {
-              this.logInfo("Checksum is ok");
-            } else {
-              this.logError("Checksum is wrong");
-              throw new MojoFailureException("Downloaded archive has wrong checksum");
-            }
-          }
+      Path sdkPath;
+      if (!isNullOrEmpty(this.sdkArtifactId)) {
+        sdkPath = downloadFromArtifactId(this.sdkArtifactId);
+      } else {
+        downloadFromUrl(sdkArchiveUrl, tempArchivePath);
+        sdkPath = tempArchivePath;
+      }
+      extractArchiveToDestination(sdkPath, destinationFolder);
+      this.logInfo("Updating file attributes in folder: " + destinationFolder);
+      this.makeExecutableFilesInFolder(destinationFolder);
+    } finally {
+      if (!this.keepDownloadedArchive && Files.exists(tempArchivePath)) {
+        this.logInfo("Deleting temporary archive file:" + tempArchivePath);
+        if (Files.deleteIfExists(tempArchivePath)) {
+          this.logDebug("Deleted successfully");
+        } else {
+          this.logWarn("Can't delete temporary archive file: " + tempArchivePath);
+          tempArchivePath.toFile().deleteOnExit();
         }
       } else {
-        this.logInfo("Check archive MD5 for provided value: " + this.expectedArchiveMd5);
+        this.logWarn("Downloaded archive not removed for direct request: " + tempArchivePath);
+      }
+    }
+  }
+
+  private void downloadFromUrl(String sdkArchiveUrl, Path tempArchivePath) throws IOException, MojoFailureException {
+    final AtomicInteger lastProgress = new AtomicInteger(-1);
+    final Header[] headers = ApacheHttpClient5Loader.loadResource("GET",
+        makeHttpClient(),
+            sdkArchiveUrl,
+        (loaded, size, progress) -> {
+          if (progress >= 0 && lastProgress.get() != progress) {
+            lastProgress.set(progress);
+            if (!this.session.isParallel() || this.hideLoadIndicator) {
+              final String sizeText = (size / 1024L) + "Mb";
+              final String loadedText = (loaded / 1024L) + "Mb";
+              printCliProgressBar("Loading GoSDK:", ' ' + loadedText + '/' + sizeText,
+                  progress, 100, 5);
+              if (progress == 100) {
+                System.out.println();
+              }
+            }
+          }
+        },
+        h -> {
+          this.logDebug("Opening output stream for archive file:" + tempArchivePath);
+          try {
+            return Files.newOutputStream(tempArchivePath);
+          } catch (IOException ex) {
+            throw new IllegalStateException(
+                "IOError during open stream for temporary file: " + tempArchivePath, ex);
+          }
+        },
+        x -> 16 * 1024 * 1024,
+        SDK_ARCHIVE_MIMES
+    );
+    this.logDebug("Headers: " + Arrays.toString(headers));
+    this.logInfo("Successfully downloaded archive file: " + tempArchivePath);
+
+    if (isNullOrEmpty(this.expectedArchiveMd5)) {
+      final ApacheHttpClient5Loader.XGoogHashHeader xgoogHeader =
+          new ApacheHttpClient5Loader.XGoogHashHeader(headers);
+      if (xgoogHeader.isValid()) {
+        this.logInfo("Detected XGoogHashHeader, validating checksum for downloaded archive");
         try (final InputStream fileInputStream = Files.newInputStream(tempArchivePath)) {
-          if (ApacheHttpClient5Loader.XGoogHashHeader.checkMd5(fileInputStream,
-              this.expectedArchiveMd5)) {
-            this.logInfo("MD5 is ok");
+          if (xgoogHeader.isDataOk(fileInputStream)) {
+            this.logInfo("Checksum is ok");
           } else {
-            this.logError("MD5 is wrong");
-            throw new MojoFailureException("Downloaded archive has wrong MD5 checksum");
+            this.logError("Checksum is wrong");
+            throw new MojoFailureException("Downloaded archive has wrong checksum");
           }
         }
       }
+    } else {
+      this.logInfo("Check archive MD5 for provided value: " + this.expectedArchiveMd5);
+      try (final InputStream fileInputStream = Files.newInputStream(tempArchivePath)) {
+        if (ApacheHttpClient5Loader.XGoogHashHeader.checkMd5(fileInputStream,
+            this.expectedArchiveMd5)) {
+          this.logInfo("MD5 is ok");
+        } else {
+          this.logError("MD5 is wrong");
+          throw new MojoFailureException("Downloaded archive has wrong MD5 checksum");
+        }
+      }
+    }
+  }
 
+  private void extractArchiveToDestination(Path tempArchivePath, Path destinationFolder) throws IOException {
+    try {
       this.logInfo("Unpacking archive into: " + destinationFolder);
       final AtomicInteger counter = new AtomicInteger();
       ArchiveUnpacker.INSTANCE.unpackArchive(tempArchivePath.toFile(), destinationFolder.toFile(),
@@ -548,7 +636,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
             @Override
             public void onArchiveEntry(ArchiveUnpacker source, ArchiveEntry archiveEntry) {
               logTrace("Archive entry: " + archiveEntry.getName() + " (" +
-                  (archiveEntry.isDirectory() ? "" : archiveEntry.getSize()) + ')');
+                      (archiveEntry.isDirectory() ? "" : archiveEntry.getSize()) + ')');
               counter.incrementAndGet();
             }
 
@@ -558,25 +646,92 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
             }
           });
       this.logInfo(
-          String.format("Archive successfully unpacked, detected %d items: %s", counter.get(),
-              destinationFolder));
-      this.logInfo("Updating file attributes in folder: " + destinationFolder);
-      this.makeExecutableFilesInFolder(destinationFolder);
+              String.format("Archive successfully unpacked, detected %d items: %s", counter.get(),
+                      destinationFolder));
     } catch (ArchiveException ex) {
       throw new IOException("Can't unpack archive for error", ex);
-    } finally {
-      if (!this.keepDownloadedArchive) {
-        this.logInfo("Deleting temporary archive file:" + tempArchivePath);
-        if (Files.deleteIfExists(tempArchivePath)) {
-          this.logDebug("Deleted successfully");
-        } else {
-          this.logWarn("Can't delete temporary archive file: " + tempArchivePath);
-          tempArchivePath.toFile().deleteOnExit();
-        }
-      } else {
-        this.logWarn("Downloaded archive not removed for direct request: " + tempArchivePath);
-      }
     }
+  }
+
+  private Path downloadFromArtifactId(String artifactId) throws IOException {
+    Artifact artifact = createDependencyArtifact(artifactId);
+    return resolveBinaryArtifact(artifact);
+  }
+
+  /**
+   * Creates a dependency artifact from a specification in
+   * {@code groupId:artifactId:version[:type[:classifier]]} format.
+   *
+   * @param artifactSpec artifact specification.
+   * @return artifact object instance.
+   */
+  private Artifact createDependencyArtifact(final String artifactSpec) throws IOException {
+    final String[] parts = artifactSpec.split(":");
+    if (parts.length < 3 || parts.length > 5) {
+      throw new IOException(
+              "Invalid artifact specification format"
+                      + ", expected: groupId:artifactId:version[:type[:classifier]]"
+                      + ", actual: " + artifactSpec);
+    }
+    final String type = parts.length >= 4 ? parts[3] : "exe";
+    final String classifier = parts.length == 5 ? parts[4] : null;
+    return createDependencyArtifact(parts[0], parts[1], parts[2], type, classifier);
+  }
+
+  private Artifact createDependencyArtifact(
+          final String groupId,
+          final String artifactId,
+          final String version,
+          final String type,
+          final String classifier
+  ) {
+    Dependency dependency = new Dependency();
+
+    dependency.setArtifactId(artifactId);
+    dependency.setGroupId(groupId);
+    dependency.setVersion(version);
+    dependency.setType(type);
+    dependency.setClassifier(classifier);
+    dependency.setScope(Artifact.SCOPE_RUNTIME);
+    return repositorySystem.createDependencyArtifact(dependency);
+  }
+
+  private Path resolveBinaryArtifact(final Artifact artifact) throws IOException {
+    final ArtifactResolutionResult result;
+    final ArtifactResolutionRequest request = new ArtifactResolutionRequest()
+            .setArtifact(project.getArtifact())
+            .setResolveRoot(false)
+            .setResolveTransitively(false)
+            .setArtifactDependencies(singleton(artifact))
+            .setManagedVersionMap(emptyMap())
+            .setLocalRepository(localRepository)
+            .setRemoteRepositories(remoteRepositories)
+            .setOffline(session.isOffline())
+            .setForceUpdate(session.getRequest().isUpdateSnapshots())
+            .setServers(session.getRequest().getServers())
+            .setMirrors(session.getRequest().getMirrors())
+            .setProxies(session.getRequest().getProxies());
+
+    result = repositorySystem.resolve(request);
+
+    try {
+      resolutionErrorHandler.throwErrors(request, result);
+    } catch (final ArtifactResolutionException e) {
+      throw new IOException("Unable to resolve artifact: " + e.getMessage(), e);
+    }
+
+    final Set<Artifact> artifacts = result.getArtifacts();
+
+    if (artifacts == null || artifacts.isEmpty()) {
+      throw new IOException("Unable to resolve artifact " + artifact);
+    }
+
+    final Artifact resolvedBinaryArtifact = artifacts.iterator().next();
+    if (getLog().isDebugEnabled()) {
+      getLog().debug("Resolved artifact: " + resolvedBinaryArtifact);
+    }
+
+    return resolvedBinaryArtifact.getFile().toPath();
   }
 
   protected abstract void onMojoExecute(final Path goSdkFolder)
