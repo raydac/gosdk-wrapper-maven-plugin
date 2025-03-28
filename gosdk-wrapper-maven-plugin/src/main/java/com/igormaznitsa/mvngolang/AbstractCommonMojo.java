@@ -2,17 +2,23 @@ package com.igormaznitsa.mvngolang;
 
 import java.io.File;
 import java.util.List;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ResolutionErrorHandler;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 
 public abstract class AbstractCommonMojo extends AbstractMojo {
 
+  protected static final String DEFAULT_GO_PATH_FOLDER = ".go_path";
   @Parameter(defaultValue = "${project.basedir}", readonly = true)
   protected File baseDir;
   @Parameter(defaultValue = "${settings}", readonly = true)
@@ -23,9 +29,6 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
   protected MojoExecution execution;
   @Parameter(readonly = true, defaultValue = "${project}", required = true)
   protected MavenProject project;
-
-  protected static final String DEFAULT_GO_PATH_FOLDER = ".go_path";
-
   /**
    * Folder caching downloaded and unpacked GoSDKs.
    *
@@ -66,8 +69,52 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
   @Parameter(property = "mvn.golang.trace", name = "trace", defaultValue = "false")
   protected boolean trace;
 
+  /**
+   * A factory for Maven artifact definitions (former ArtifactFactory).
+   *
+   * @since 1.0.4
+   */
+  @Component
+  protected RepositorySystem repositorySystem;
+
+  /**
+   * This is the path to the local maven {@code repository}.
+   *
+   * @since @since 1.0.4
+   */
+  @Parameter(
+      required = true,
+      readonly = true,
+      property = "localRepository"
+  )
+  protected ArtifactRepository localRepository;
+
+  /**
+   * Remote repositories for artifact resolution.
+   *
+   * @since @since 1.0.4
+   */
+  @Parameter(
+      required = true,
+      readonly = true,
+      defaultValue = "${project.remoteArtifactRepositories}"
+  )
+  protected List<ArtifactRepository> remoteRepositories;
+
+  /**
+   * A component that handles resolution errors.
+   *
+   * @since @since 1.0.4
+   */
+  @Component
+  protected ResolutionErrorHandler resolutionErrorHandler;
+
   protected static boolean isNullOrEmpty(final String text) {
     return text == null || text.isBlank();
+  }
+
+  protected static String findArchiveExtensionForOs() {
+    return SystemUtils.IS_OS_WINDOWS ? "zip" : "tar.gz";
   }
 
   protected abstract boolean isSkip();
@@ -114,6 +161,11 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
 
   @Override
   public final void execute() throws MojoExecutionException, MojoFailureException {
+    if (this.isSkip()) {
+      this.logInfo("Skipping execution");
+      return;
+    }
+
     if (this.echo != null && !this.echo.isEmpty()) {
       this.echo.forEach(this::logInfo);
     }

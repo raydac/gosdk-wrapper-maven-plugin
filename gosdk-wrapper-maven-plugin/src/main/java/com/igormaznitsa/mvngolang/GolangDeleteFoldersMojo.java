@@ -54,11 +54,6 @@ public class GolangDeleteFoldersMojo extends AbstractFileProcessingMojo {
 
   @Override
   public void doExecute() throws MojoFailureException {
-    if (this.isSkip()) {
-      this.logInfo("Delete folders is skipped");
-      return;
-    }
-
     final String message;
     if (this.forceDelete) {
       message = "Deleting the folder (force mode): ";

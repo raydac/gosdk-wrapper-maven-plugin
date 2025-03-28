@@ -72,41 +72,37 @@ public class GiveAllPermissionsMojo extends AbstractFileProcessingMojo {
   @SuppressWarnings("RedundantThrows")
   @Override
   public void doExecute() throws MojoExecutionException, MojoFailureException {
-    if (this.isSkip()) {
-      this.logInfo("Skipped");
+    if (this.fileSets == null || this.fileSets.isEmpty()) {
+      this.logWarn("No defined file sets");
     } else {
-      if (this.fileSets == null || this.fileSets.isEmpty()) {
-        this.logWarn("No defined file sets");
-      } else {
-        for (final FileSet fs : this.fileSets) {
-          for (final File file : getFilesFromFileSet(fs)) {
-            if (!file.isFile()) {
-              this.logWarn("Can't find file, skipping it: " + file);
-              continue;
-            }
+      for (final FileSet fs : this.fileSets) {
+        for (final File file : getFilesFromFileSet(fs)) {
+          if (!file.isFile()) {
+            this.logWarn("Can't find file, skipping it: " + file);
+            continue;
+          }
 
-            final Path path = file.toPath();
-            this.logTrace("Processing file: " + path);
-            if (this.isProjectBound()) {
-              try {
-                this.assertProjectBound(path);
-              } catch (IllegalStateException ex) {
-                if (this.isFailOnError()) {
-                  throw new MojoFailureException("File is not in the project file tree: " + path);
-                } else {
-                  this.logWarn("File is not in the project file tree: " + path);
-                }
+          final Path path = file.toPath();
+          this.logTrace("Processing file: " + path);
+          if (this.isProjectBound()) {
+            try {
+              this.assertProjectBound(path);
+            } catch (IllegalStateException ex) {
+              if (this.isFailOnError()) {
+                throw new MojoFailureException("File is not in the project file tree: " + path);
+              } else {
+                this.logWarn("File is not in the project file tree: " + path);
               }
             }
-            try {
-              FileUtils.makeWritable(path, this.isFollowSymLinks());
-            } catch (Exception ex) {
-              if (this.isFailOnError()) {
-                throw new MojoFailureException("Can't make the file writable: " + path, ex);
-              } else {
-                this.logWarn(
-                    "Can't make the file writable: " + path + " (" + ex.getMessage() + ')');
-              }
+          }
+          try {
+            FileUtils.makeWritable(path, this.isFollowSymLinks());
+          } catch (Exception ex) {
+            if (this.isFailOnError()) {
+              throw new MojoFailureException("Can't make the file writable: " + path, ex);
+            } else {
+              this.logWarn(
+                  "Can't make the file writable: " + path + " (" + ex.getMessage() + ')');
             }
           }
         }

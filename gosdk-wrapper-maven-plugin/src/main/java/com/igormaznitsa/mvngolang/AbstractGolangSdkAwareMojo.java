@@ -39,17 +39,13 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.core5.http.Header;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
-import org.apache.maven.artifact.resolver.ResolutionErrorHandler;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Proxy;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -222,47 +218,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   @Parameter(property = "mvn.golang.sdk.archive.file.auto.extension", name = "sdkArchiveFileAutoExtension", defaultValue = "true")
   private boolean sdkArchiveFileAutoExtension;
 
-  /**
-   * A factory for Maven artifact definitions (former ArtifactFactory).
-   *
-   * @since 1.0.4
-   */
-  @Component
-  private RepositorySystem repositorySystem;
-
-  /**
-   * This is the path to the local maven {@code repository}.
-   *
-   * @since @since 1.0.4
-   */
-  @Parameter(
-      required = true,
-      readonly = true,
-      property = "localRepository"
-  )
-  private ArtifactRepository localRepository;
-
-  /**
-   * Remote repositories for artifact resolution.
-   *
-   * @since @since 1.0.4
-   */
-  @Parameter(
-      required = true,
-      readonly = true,
-      defaultValue = "${project.remoteArtifactRepositories}"
-  )
-  private List<ArtifactRepository> remoteRepositories;
-
-  /**
-   * A component that handles resolution errors.
-   *
-   * @since @since 1.0.4
-   */
-  @Component
-  private ResolutionErrorHandler resolutionErrorHandler;
-
-
   private static String makeBaseSdkName(
       final String sdkVersion,
       final String os,
@@ -391,11 +346,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
   @Override
   public final void doExecute() throws MojoExecutionException, MojoFailureException {
-    if (this.isSkip()) {
-      this.logInfo("Skip execution");
-      return;
-    }
-
     final long startTime = System.currentTimeMillis();
     final Path goSdkFolder;
     if (isNullOrEmpty(this.preinstalledSdkFolder)) {
@@ -512,9 +462,11 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
       FileUtils.deleteDirectory(destinationFolder.toFile());
     }
 
+    final boolean loadAsArtifactId = !isNullOrEmpty(this.sdkArtifactId);
+
     final String sdkArchiveUrl;
     final String fileName;
-    if (isNullOrEmpty(this.sdkDownloadUrl)) {
+    if (isNullOrEmpty(this.sdkDownloadUrl) && !loadAsArtifactId) {
       if (isNullOrEmpty(this.sdkArchiveFileName)) {
         this.logDebug("Looking for GoSDK archive name");
         final Document document =
@@ -529,10 +481,17 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
       sdkArchiveUrl = this.normalizedSdkSite() + fileName;
       this.logInfo("Loading from: " + sdkArchiveUrl);
     } else {
-      this.logWarn("Detected directly provided download link: " + this.sdkDownloadUrl);
-      fileName = isNullOrEmpty(this.sdkArchiveFileName) ? "directLinkGoSdk" :
-          this.sdkArchiveFileName.trim();
-      sdkArchiveUrl = this.sdkDownloadUrl.trim();
+      if (loadAsArtifactId) {
+        this.logDebug("Loading from Maven repository");
+        sdkArchiveUrl = null;
+        fileName = isNullOrEmpty(this.sdkArchiveFileName) ? "mavenRepositoryArtifact" :
+            this.sdkArchiveFileName.trim();
+      } else {
+        this.logWarn("Detected directly provided download link: " + this.sdkDownloadUrl);
+        fileName = isNullOrEmpty(this.sdkArchiveFileName) ? "directLinkGoSdk" :
+            this.sdkArchiveFileName.trim();
+        sdkArchiveUrl = this.sdkDownloadUrl.trim();
+      }
     }
 
     final Path loadFolder = this.findDownloadArchiveFolder();
@@ -542,15 +501,15 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
             ensureSafeFileName(fileName));
     try {
       Path sdkPath;
-      if (isNullOrEmpty(this.sdkArtifactId)) {
-        this.logInfo("Retrieving GoSDK from URL: " + sdkArchiveUrl);
-        downloadFromUrl(sdkArchiveUrl, tempArchivePath);
-        sdkPath = tempArchivePath;
-      } else {
+      if (loadAsArtifactId) {
         final String trimmedSdkArtifactId = this.sdkArtifactId.trim();
         this.logWarn("Retrieving artifact from the Maven repository: " + trimmedSdkArtifactId);
         sdkPath = this.downloadFromArtifactId(trimmedSdkArtifactId);
         this.logOptional("SDK artifact archive location: " + sdkPath);
+      } else {
+        this.logInfo("Retrieving GoSDK from URL: " + sdkArchiveUrl);
+        downloadFromUrl(sdkArchiveUrl, tempArchivePath);
+        sdkPath = tempArchivePath;
       }
       this.extractArchiveToDestination(sdkPath, destinationFolder);
       this.logInfo("Updating file attributes in folder: " + destinationFolder);
@@ -565,7 +524,9 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
           tempArchivePath.toFile().deleteOnExit();
         }
       } else {
-        this.logWarn("Downloaded archive not removed for direct request: " + tempArchivePath);
+        if (Files.exists(tempArchivePath)) {
+          this.logWarn("Downloaded archive not removed for direct request: " + tempArchivePath);
+        }
       }
     }
   }
@@ -685,9 +646,9 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
               + ", expected: groupId:artifactId:version[:type[:classifier]]"
               + ", actual: " + artifactSpec);
     }
-    final String type = parts.length >= 4 ? parts[3] : "exe";
+    final String type = parts.length >= 4 ? parts[3] : findArchiveExtensionForOs();
     final String classifier = parts.length == 5 ? parts[4] : null;
-    return createDependencyArtifact(parts[0], parts[1], parts[2], type, classifier);
+    return this.createDependencyArtifact(parts[0], parts[1], parts[2], type, classifier);
   }
 
   private Artifact createDependencyArtifact(
@@ -697,14 +658,15 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
       final String type,
       final String classifier
   ) {
-    Dependency dependency = new Dependency();
+    final Dependency dependency = new Dependency();
 
     dependency.setArtifactId(artifactId);
     dependency.setGroupId(groupId);
     dependency.setVersion(version);
     dependency.setType(type);
     dependency.setClassifier(classifier);
-    dependency.setScope(Artifact.SCOPE_RUNTIME);
+    dependency.setScope(Artifact.SCOPE_PROVIDED);
+
     return repositorySystem.createDependencyArtifact(dependency);
   }
 
@@ -883,7 +845,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
       if (this.sdkArchiveFileAutoExtension) {
         final String supposedSdkName =
-            sdkBaseName + '.' + (SystemUtils.IS_OS_WINDOWS ? "zip" : "tar.gz");
+            sdkBaseName + '.' + findArchiveExtensionForOs();
         this.logWarn("Force supposed GoSDK file name: " + supposedSdkName);
         return supposedSdkName;
       }
