@@ -672,20 +672,20 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
   private Path resolveBinaryArtifact(final Artifact artifact) throws IOException {
     final ArtifactResolutionRequest request = new ArtifactResolutionRequest()
-        .setArtifact(project.getArtifact())
+        .setArtifact(this.project.getArtifact())
         .setResolveRoot(false)
         .setResolveTransitively(false)
         .setArtifactDependencies(singleton(artifact))
         .setManagedVersionMap(emptyMap())
-        .setLocalRepository(localRepository)
-        .setRemoteRepositories(remoteRepositories)
-        .setOffline(session.isOffline())
-        .setForceUpdate(session.getRequest().isUpdateSnapshots())
-        .setServers(session.getRequest().getServers())
-        .setMirrors(session.getRequest().getMirrors())
-        .setProxies(session.getRequest().getProxies());
+        .setLocalRepository(this.localRepository)
+        .setRemoteRepositories(this.remoteRepositories)
+        .setOffline(this.session.isOffline())
+        .setForceUpdate(this.session.getRequest().isUpdateSnapshots())
+        .setServers(this.session.getRequest().getServers())
+        .setMirrors(this.session.getRequest().getMirrors())
+        .setProxies(this.session.getRequest().getProxies());
 
-    final ArtifactResolutionResult result = repositorySystem.resolve(request);
+    final ArtifactResolutionResult result = this.repositorySystem.resolve(request);
     try {
       this.resolutionErrorHandler.throwErrors(request, result);
     } catch (final ArtifactResolutionException e) {
