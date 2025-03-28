@@ -151,6 +151,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   /**
    * Maven artifact id to load GoSDK archive as an artifact from current Maven repository. It has the highest priority during SDK download.
    * Expected format groupId:artifactId:version[:type[:classifier]]
+   * If the type is not defined, the archive extension will be automatically determined based on the host OS.
    *
    * <p>Example usage:</p>
    * <pre>{@code
