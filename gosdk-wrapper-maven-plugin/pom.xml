@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.igormaznitsa</groupId>
         <artifactId>gosdk-wrapper-maven-plugin-parent</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <version>1.0.4</version>
     </parent>
 
     <artifactId>gosdk-wrapper-maven-plugin</artifactId>
@@ -24,7 +24,7 @@
 
     <profiles>
         <profile>
-            <id>publish</id>
+            <id>site</id>
             <properties>
                 <mojo.site.dir>${project.basedir}/../mojo-doc-site</mojo.site.dir>
             </properties>
@@ -60,6 +60,29 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-site-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>generate-project-site</id>
+                                <goals>
+                                    <goal>site</goal>
+                                </goals>
+                                <phase>verify</phase>
+                                <configuration>
+                                    <outputDirectory>${mojo.site.dir}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>publish</id>
+            <build>
+                <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jxr-plugin</artifactId>
@@ -126,7 +149,7 @@
                                     <goal>jar</goal>
                                 </goals>
                                 <configuration>
-                                    <source>8</source>
+                                    <source>11</source>
                                 </configuration>
                             </execution>
                         </executions>
@@ -142,22 +165,6 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-site-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>generate-project-site</id>
-                                <goals>
-                                    <goal>site</goal>
-                                </goals>
-                                <phase>verify</phase>
-                                <configuration>
-                                    <outputDirectory>${mojo.site.dir}</outputDirectory>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
