@@ -1,6 +1,6 @@
-# 1.0.5 (SNAPSHOT)
+# 1.0.5 (30-jun-2025)
 
-    -
+    - updated dependencies and fixed vulnerable dependency alert
 
 # 1.0.4 (29-mar-2025)
 
