@@ -167,7 +167,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    *
    * @since 1.0.0
    */
-  @Parameter(property = "mvn.golang.go.version", name = "goVersion", defaultValue = "1.24.1")
+  @Parameter(property = "mvn.golang.go.version", name = "goVersion", defaultValue = "1.24.4")
   private String goVersion;
   /**
    * GoSDK OS.

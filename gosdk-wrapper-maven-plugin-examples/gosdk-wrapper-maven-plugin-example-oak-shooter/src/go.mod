@@ -1,3 +1,3 @@
 module github.com/mycodesmells/golang-examples/modules
 
-        go 1.24.1
+        go 1.24.4
