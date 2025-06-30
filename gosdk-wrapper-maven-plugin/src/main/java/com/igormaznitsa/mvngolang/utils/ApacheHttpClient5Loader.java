@@ -256,7 +256,7 @@ public class ApacheHttpClient5Loader {
     }
 
     return builder
-        .setUserAgent("gosdk-wrapper-maven-plugin-agent/1.0.5")
+        .setUserAgent("gosdk-wrapper-maven-plugin-agent/1.0.6")
         .disableCookieManagement()
         .build();
   }
