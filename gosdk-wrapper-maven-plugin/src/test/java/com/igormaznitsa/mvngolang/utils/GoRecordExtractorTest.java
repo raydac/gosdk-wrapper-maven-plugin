@@ -1,11 +1,11 @@
 package com.igormaznitsa.mvngolang.utils;
 
+import static com.igormaznitsa.mvngolang.GoRecordChecksum.SHA256;
 import static com.igormaznitsa.mvngolang.utils.GoRecordExtractor.concatUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.igormaznitsa.mvngolang.GoRecord;
-import com.igormaznitsa.mvngolang.GoRecordChecksum;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -48,6 +48,11 @@ class GoRecordExtractorTest {
     final List<GoRecord> recordList =
         GoRecordExtractor.getInstance().findRecords("", text).orElseThrow();
     assertEquals(259, recordList.size());
+    final GoRecord record = recordList.get(0);
+    assertEquals("go1.10", record.getName());
+    assertEquals(75, record.getFiles().size());
+    assertEquals(1, record.getFiles().get(0).getChecksum().size());
+    assertEquals(SHA256, record.getFiles().get(0).getChecksum().keySet().iterator().next());
   }
 
   @Test
@@ -73,7 +78,7 @@ class GoRecordExtractorTest {
     assertEquals("https://go.dev/dl/go1.10.1.zip", file1.getLink());
     assertEquals(1, file1.getChecksum().size());
     assertEquals("a81a4ba593d0015e10c51e267de3ff07c7ac914dfca037d9517d029517097795",
-        file1.getChecksum().get(GoRecordChecksum.SHA256));
+        file1.getChecksum().get(SHA256));
 
     final GoRecord record2 = recordList.get(1);
     assertEquals("go1.25.3", record2.getName());

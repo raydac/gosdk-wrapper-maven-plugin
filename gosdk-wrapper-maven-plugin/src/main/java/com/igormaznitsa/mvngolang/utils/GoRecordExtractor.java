@@ -45,7 +45,8 @@ public class GoRecordExtractor {
   private static final String JSON_CHECKSUM = "checksum";
 
   private static final Pattern SDK_NAME_PATTERN = Pattern.compile("([a-zA-Z\\d]+(?:\\.\\d+)+).*");
-  private static final Pattern SHA256PATTERN = Pattern.compile("\\b[A-Fa-f0-9]{64}\\b");
+  private static final Pattern SHA256PATTERN = Pattern.compile("\\b([A-Fa-f0-9]{64})\\b");
+  private static final Pattern MD5PATTERN = Pattern.compile("\\b([A-Fa-f0-9]{32})\\b");
 
   private static final GoRecordExtractor INSTANCE = new GoRecordExtractor();
 
@@ -143,13 +144,17 @@ public class GoRecordExtractor {
         String fileName = null;
         String fileLink = null;
         String sha256 = null;
+        String md5 = null;
         final Elements tdTags = tr.getElementsByTag("td");
         for (final org.jsoup.nodes.Element td : tdTags) {
           if (tr.equals(td.parent())) {
             final String fullText = td.text();
             final Matcher sha256Matcher = SHA256PATTERN.matcher(fullText);
-            if (sha256Matcher.matches()) {
-              sha256 = fullText.trim();
+            final Matcher md5Matcher = MD5PATTERN.matcher(fullText);
+            if (sha256Matcher.find()) {
+              sha256 = sha256Matcher.group(1);
+            } else if (md5Matcher.matches()) {
+              md5 = md5Matcher.group(1);
             }
             final Elements anchors = td.getElementsByTag("a");
             for (final org.jsoup.nodes.Element anchor : anchors) {
@@ -168,8 +173,15 @@ public class GoRecordExtractor {
         }
 
         if (name != null && fileLink != null) {
-          final GoRecord.GoFile nextFile = new GoRecord.GoFile(fileName, fileLink,
-              sha256 == null ? Map.of() : Map.of(SHA256, sha256));
+          final Map<GoRecordChecksum, String> checksumStringMap = new HashMap<>();
+          if (sha256 != null) {
+            checksumStringMap.put(SHA256, sha256);
+          }
+          if (md5 != null) {
+            checksumStringMap.put(MD5, md5);
+          }
+          final GoRecord.GoFile nextFile =
+              new GoRecord.GoFile(fileName, fileLink, Map.copyOf(checksumStringMap));
           records.merge(name, List.of(nextFile),
               (a, b) -> concat(a.stream(), b.stream()).collect(toList()));
         }
@@ -225,12 +237,9 @@ public class GoRecordExtractor {
               final String version = matcher.group(1);
               String md5 = null;
               if (eTags.getLength() > 0) {
-                md5 = eTags.item(0).getTextContent();
-                if (md5.startsWith("\"")) {
-                  md5 = md5.substring(1);
-                }
-                if (md5.endsWith("\"")) {
-                  md5 = md5.substring(0, md5.length() - 1);
+                final Matcher md5matcher = MD5PATTERN.matcher(eTags.item(0).getTextContent());
+                if (md5matcher.find()) {
+                  md5 = md5matcher.group(1);
                 }
               }
               recordMap.merge(version,
