@@ -1,3 +1,7 @@
+# 1.1.0 (SNAPSHOT)
+
+    - Improved parsing of SDK list to support many formats and be prepared for load SDK through site instead of store [#7](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/7)  
+
 # 1.0.5 (30-jun-2025)
 
     - updated dependencies and fixed vulnerable dependency alert

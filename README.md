@@ -9,14 +9,14 @@
 
 # Changelog
 
+__1.1.0 (SNAPSHOT)__
+
+- improved parsing of SDK list to support many formats and be prepared for load SDK through site instead of
+  store [#7](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/7)
+
 __1.0.5 (30-jun-2025)__
 
 - updated dependencies and fixed vulnerable dependency alert
-
-__1.0.4 (29-mar-2025)__
-
-- added way to load GoSDK from Maven repository as an artifact, parameter `sdkArtifactId`
-- refactoring and polishing
 
 [full changelog](https://github.com/raydac/gosdk-wrapper-maven-plugin/blob/master/CHANGELOG.md)
 
