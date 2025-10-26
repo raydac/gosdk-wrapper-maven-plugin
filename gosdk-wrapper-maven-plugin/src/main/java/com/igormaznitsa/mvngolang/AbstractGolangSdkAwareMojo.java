@@ -6,14 +6,17 @@ import static java.lang.System.out;
 import static java.nio.file.Files.isRegularFile;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 
 import com.igormaznitsa.mvngolang.utils.ApacheHttpClient5Loader;
 import com.igormaznitsa.mvngolang.utils.ArchiveUnpacker;
+import com.igormaznitsa.mvngolang.utils.GoRecordExtractor;
 import com.igormaznitsa.mvngolang.utils.ProxySettings;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -22,16 +25,14 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
@@ -50,8 +51,6 @@ import org.apache.maven.settings.Proxy;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 @SuppressWarnings({"ReassignedVariable", "CanBeFinal", "SameParameterValue"})
 public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
@@ -308,7 +307,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
       variants = possibleExtensions.stream()
           .flatMap(x -> Stream.of(x, x.toUpperCase(Locale.ENGLISH)))
           .map(x -> fileName + x)
-          .collect(Collectors.toSet());
+          .collect(toSet());
     }
 
     final List<Path> result = new ArrayList<>();
@@ -465,21 +464,83 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
     final boolean loadAsArtifactId = !isNullOrEmpty(this.sdkArtifactId);
 
+    Map<GoRecordChecksum, String> expectedChecksum =
+        isNullOrEmpty(this.expectedArchiveMd5) ? Map.of() :
+            Map.of(GoRecordChecksum.MD5, this.expectedArchiveMd5.trim());
     final String sdkArchiveUrl;
     final String fileName;
     if (isNullOrEmpty(this.sdkDownloadUrl) && !loadAsArtifactId) {
+      final String recordVersion = GoRecordExtractor.extractSdkVersion(sdkBaseName).orElse(null);
+      if (recordVersion == null) {
+        throw new MojoFailureException("Can't extract expected go sdk version from " + sdkBaseName);
+      }
+
+      final GoRecord.GoFile record;
       if (isNullOrEmpty(this.sdkArchiveFileName)) {
         this.logDebug("Looking for GoSDK archive name");
-        final Document document =
-            this.loadGolangSdkList(URLEncoder.encode(sdkBaseName, StandardCharsets.UTF_8));
-        fileName =
-            this.extractSdkFileName(document, sdkBaseName, List.of("tar.gz", "zip"));
+        final List<GoRecord> records = this.loadSdkListAsString(this.sdkSite.trim(),
+            URLEncoder.encode(sdkBaseName, StandardCharsets.UTF_8));
+
+        this.logDebug("Loaded GoSDK records: " + records.stream()
+            .map(x -> x.getName() + '(' +
+                x.getFiles().stream().map(GoRecord.GoFile::getFileName).collect(
+                    joining(",")) + ')').collect(
+                joining(" ")));
+
+        final Set<String> allFileNames =
+            Stream.of("tar.gz", "zip").map(x -> sdkBaseName + '.' + x).collect(toSet());
+
+        final GoRecord sdkRecord = records.stream()
+            .filter(x -> x.getName().equalsIgnoreCase(recordVersion))
+            .findFirst()
+            .orElse(null);
+
+        if (sdkRecord == null) {
+          this.logError(
+              String.format("Can't find %s among loaded records: %s", sdkBaseName, records.stream()
+                  .map(GoRecord::getName).collect(joining(","))));
+          throw new MojoFailureException(
+              "Can't find " + sdkBaseName + " sdk record among " + records.size() +
+                  " record(s) in loaded list");
+        }
+
+        record = sdkRecord.getFiles().stream()
+            .filter(x -> allFileNames.contains(x.getFileName()))
+            .findFirst()
+            .orElse(null);
+
+        if (record == null) {
+          if (this.sdkArchiveFileAutoExtension) {
+            final String supposedSdkName =
+                sdkBaseName + '.' + findArchiveExtensionForOs();
+            this.logWarn("Force supposed GoSDK file name: " + supposedSdkName);
+            fileName = supposedSdkName;
+            sdkArchiveUrl = GoRecordExtractor.concatUrl(this.sdkSite.trim(), supposedSdkName);
+          } else {
+            this.logError(
+                "Can't find expected file (" + allFileNames + ") among files: " +
+                    sdkRecord.getFiles().stream().map(
+                        GoRecord.GoFile::getFileName).collect(
+                        joining(",")));
+            throw new MojoFailureException(
+                "Can't find any supported archive among file list for " + sdkBaseName);
+          }
+        } else {
+          fileName = record.getFileName();
+          sdkArchiveUrl = record.getLink();
+          if (!record.getChecksum().isEmpty()) {
+            final Map<GoRecordChecksum, String> mergedChecksumMap =
+                new HashMap<>(record.getChecksum());
+            mergedChecksumMap.putAll(expectedChecksum);
+            expectedChecksum = mergedChecksumMap;
+          }
+        }
+
       } else {
         this.logInfo("Detected directly provided GoSDK archive name: " + this.sdkArchiveFileName);
         fileName = this.sdkArchiveFileName;
+        sdkArchiveUrl = this.normalizedSdkSite() + fileName;
       }
-      this.logInfo("Found listed archive: " + fileName);
-      sdkArchiveUrl = this.normalizedSdkSite() + fileName;
       this.logInfo("Loading from: " + sdkArchiveUrl);
     } else {
       if (loadAsArtifactId) {
@@ -509,7 +570,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
         this.logOptional("SDK artifact archive location: " + sdkPath);
       } else {
         this.logInfo("Retrieving GoSDK from URL: " + sdkArchiveUrl);
-        downloadFromUrl(sdkArchiveUrl, tempArchivePath);
+        this.downloadFromUrl(sdkArchiveUrl, tempArchivePath, expectedChecksum);
         sdkPath = tempArchivePath;
       }
       this.extractArchiveToDestination(sdkPath, destinationFolder);
@@ -532,65 +593,82 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
   }
 
-  private void downloadFromUrl(String sdkArchiveUrl, Path tempArchivePath)
+  private void downloadFromUrl(final String sdkArchiveUrl, final Path tempArchivePath,
+                               final Map<GoRecordChecksum, String> checksum)
       throws IOException, MojoFailureException {
-    final AtomicInteger lastProgress = new AtomicInteger(-1);
-    final Header[] headers = ApacheHttpClient5Loader.loadResource("GET",
-        makeHttpClient(),
-        sdkArchiveUrl,
-        (loaded, size, progress) -> {
-          if (progress >= 0 && lastProgress.get() != progress) {
-            lastProgress.set(progress);
-            if (!this.session.isParallel() || this.hideLoadIndicator) {
-              final String sizeText = (size / 1024L) + "Mb";
-              final String loadedText = (loaded / 1024L) + "Mb";
-              printCliProgressBar("Loading GoSDK:", ' ' + loadedText + '/' + sizeText,
-                  progress, 100, 5);
-              if (progress == 100) {
-                System.out.println();
+    if (sdkArchiveUrl.toLowerCase(Locale.ROOT).startsWith("http:") ||
+        sdkArchiveUrl.toLowerCase(Locale.ROOT).startsWith("https:")) {
+      final AtomicInteger lastProgress = new AtomicInteger(-1);
+      final Header[] headers = ApacheHttpClient5Loader.loadResource("GET",
+          makeHttpClient(),
+          sdkArchiveUrl,
+          (loaded, size, progress) -> {
+            if (progress >= 0 && lastProgress.get() != progress) {
+              lastProgress.set(progress);
+              if (!this.session.isParallel() || this.hideLoadIndicator) {
+                final String sizeText = (size / 1024L) + "Mb";
+                final String loadedText = (loaded / 1024L) + "Mb";
+                printCliProgressBar("Loading GoSDK:", ' ' + loadedText + '/' + sizeText,
+                    progress, 100, 5);
+                if (progress == 100) {
+                  System.out.println();
+                }
               }
             }
-          }
-        },
-        h -> {
-          this.logDebug("Opening output stream for archive file:" + tempArchivePath);
-          try {
-            return Files.newOutputStream(tempArchivePath);
-          } catch (IOException ex) {
-            throw new IllegalStateException(
-                "IOError during open stream for temporary file: " + tempArchivePath, ex);
-          }
-        },
-        x -> 16 * 1024 * 1024,
-        SDK_ARCHIVE_MIMES
-    );
-    this.logDebug("Headers: " + Arrays.toString(headers));
-    this.logInfo("Successfully downloaded archive file: " + tempArchivePath);
+          },
+          h -> {
+            this.logDebug("Opening output stream for archive file:" + tempArchivePath);
+            try {
+              return Files.newOutputStream(tempArchivePath);
+            } catch (IOException ex) {
+              throw new IllegalStateException(
+                  "IOError during open stream for temporary file: " + tempArchivePath, ex);
+            }
+          },
+          x -> 16 * 1024 * 1024,
+          SDK_ARCHIVE_MIMES
+      );
+      this.logDebug("Headers: " + Arrays.toString(headers));
+      this.logInfo("Successfully downloaded archive file: " + tempArchivePath);
 
-    if (isNullOrEmpty(this.expectedArchiveMd5)) {
-      final ApacheHttpClient5Loader.XGoogHashHeader xgoogHeader =
-          new ApacheHttpClient5Loader.XGoogHashHeader(headers);
-      if (xgoogHeader.isValid()) {
-        this.logInfo("Detected XGoogHashHeader, validating checksum for downloaded archive");
-        try (final InputStream fileInputStream = Files.newInputStream(tempArchivePath)) {
-          if (xgoogHeader.isDataOk(fileInputStream)) {
-            this.logInfo("Checksum is ok");
-          } else {
-            this.logError("Checksum is wrong");
-            throw new MojoFailureException("Downloaded archive has wrong checksum");
+      if (checksum.isEmpty()) {
+        final ApacheHttpClient5Loader.XGoogHashHeader xgoogHeader =
+            new ApacheHttpClient5Loader.XGoogHashHeader(headers);
+        if (xgoogHeader.isValid()) {
+          this.logInfo("Detected XGoogHashHeader, validating checksum for downloaded archive");
+          try (final InputStream fileInputStream = Files.newInputStream(tempArchivePath)) {
+            if (xgoogHeader.isDataOk(fileInputStream)) {
+              this.logInfo("Checksum is ok");
+            } else {
+              this.logError("Checksum is wrong");
+              throw new MojoFailureException("Downloaded archive has wrong checksum");
+            }
+          }
+        } else {
+          this.logWarn(
+              "There is no XGoogHashHeader in response and no provided checksum to check the downloaded archive");
+        }
+      } else {
+        for (final Map.Entry<GoRecordChecksum, String> c : checksum.entrySet()) {
+          this.logInfo("Validating checksum of downloaded archive: " + c.getKey().name());
+          final String hex;
+          try (final InputStream inputStream = Files.newInputStream(tempArchivePath)) {
+            hex = c.getKey().makeHex(inputStream);
+          }
+          if (!c.getValue().equalsIgnoreCase(hex)) {
+            this.logError(c.getKey() + " : expected " + c.getValue() + " but detected " + hex);
+            throw new MojoFailureException("Wrong " + hex + " signature, expected " + c.getValue());
           }
         }
       }
     } else {
-      this.logInfo("Check archive MD5 for provided value: " + this.expectedArchiveMd5);
-      try (final InputStream fileInputStream = Files.newInputStream(tempArchivePath)) {
-        if (ApacheHttpClient5Loader.XGoogHashHeader.checkMd5(fileInputStream,
-            this.expectedArchiveMd5)) {
-          this.logInfo("MD5 is ok");
-        } else {
-          this.logError("MD5 is wrong");
-          throw new MojoFailureException("Downloaded archive has wrong MD5 checksum");
-        }
+      this.logInfo("Copying local file archive: " + sdkArchiveUrl);
+      final File archive = sdkArchiveUrl.toLowerCase(Locale.ROOT).startsWith("file:") ?
+          new File(URI.create(sdkArchiveUrl)) : new File(sdkArchiveUrl);
+      if (archive.isFile()) {
+        Files.copy(archive.toPath(), tempArchivePath);
+      } else {
+        throw new MojoFailureException("Can't find archive file: " + archive.getAbsolutePath());
       }
     }
   }
@@ -820,7 +898,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
     final Set<String> variantsWithExtensions =
         allowedExtensions.stream().map(x -> sdkBaseName + '.' + x).collect(
-            Collectors.toSet());
+            toSet());
 
     final List<String> listOfFoundSdk = new ArrayList<>();
 
@@ -842,7 +920,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
       this.logWarn(String.format("Can't find any expected distributive %s among provided files:%s",
           variantsWithExtensions, listOfFoundSdk.stream().collect(
-              Collectors.joining("\n", "\n", "\n"))));
+              joining("\n", "\n", "\n"))));
 
       if (this.sdkArchiveFileAutoExtension) {
         final String supposedSdkName =
@@ -856,31 +934,35 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
   }
 
-  private Document loadGolangSdkList(final String keyPrefix) throws IOException {
-    final String listOfFilesUrl =
-        this.sdkSite.trim() + (keyPrefix == null ? "" : "?prefix=" + keyPrefix);
-    this.logDebug("Loading URL list document from GoSDK site: " + listOfFilesUrl);
-    final String text =
-        ApacheHttpClient5Loader.loadResourceAsString("GET", this.makeHttpClient(), listOfFilesUrl,
-            List.of("application/xml"));
-    this.logDebug("Loaded URL list: " + text);
-    if (text == null) {
-      throw new IOException("Empty result as GoSDK list");
+  private List<GoRecord> loadSdkListAsString(final String sdkSite, final String keyPrefix)
+      throws IOException {
+    final String text;
+    if (sdkSite.toLowerCase(Locale.ROOT).startsWith("http:") ||
+        sdkSite.toLowerCase(Locale.ROOT).startsWith("https:")) {
+      final String listOfFilesUrl =
+          sdkSite.trim() + (keyPrefix == null ? "" : "?prefix=" + keyPrefix);
+
+      this.logDebug("Loading URL list document from GoSDK site: " + listOfFilesUrl);
+
+      text =
+          ApacheHttpClient5Loader.loadResourceAsString("GET", this.makeHttpClient(), listOfFilesUrl,
+              List.of("application/xml", "application/json", "text/plain", "text/html"));
+    } else {
+      this.logDebug("Loading file list document from GoSDK site: " + sdkSite);
+      final File file = new File(sdkSite);
+      if (!file.isFile()) {
+        throw new IOException("Can't find sdk list file: " + file.getAbsolutePath());
+      }
+      text = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
     }
-    try {
-      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      final DocumentBuilder builder = factory.newDocumentBuilder();
-      return builder.parse(new InputSource(new StringReader(text)));
-    } catch (ParserConfigurationException ex) {
-      getLog().error("Can't configure XML parser", ex);
-      throw new IOException("Can't configure XML parser", ex);
-    } catch (SAXException ex) {
-      getLog().error("Can't parse document", ex);
-      throw new IOException("Can't parse document", ex);
-    } catch (IOException ex) {
-      getLog().error("Unexpected IOException", ex);
-      throw new IOException("Unexpected IOException", ex);
+
+    final List<GoRecord> goRecordList =
+        GoRecordExtractor.getInstance().findRecords(sdkSite, text).orElse(null);
+    if (goRecordList == null) {
+      throw new IOException("Can't extract GoSDK items from loaded text: " + sdkSite);
     }
+
+    return goRecordList;
   }
 
   private void unlockSdkFolder(final File lockFile) throws IOException {

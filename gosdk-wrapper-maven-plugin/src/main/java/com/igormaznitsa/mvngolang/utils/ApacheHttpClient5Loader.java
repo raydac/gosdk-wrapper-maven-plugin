@@ -1,5 +1,6 @@
 package com.igormaznitsa.mvngolang.utils;
 
+import static java.net.HttpURLConnection.HTTP_OK;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
@@ -119,15 +120,19 @@ public class ApacheHttpClient5Loader {
     request.setHeader("Accept", acceptedMimes == null ? "*/*" : String.join(",", acceptedMimes));
     final HttpContext context = HttpClientContext.create();
     try (final ClassicHttpResponse response = httpClient.executeOpen(target, request, context)) {
-      HttpEntity entity = response.getEntity();
-      if (entity != null) {
-        try {
-          return EntityUtils.toString(entity);
-        } catch (ParseException ex) {
-          throw new IOException("Can't parse entity", ex);
+      if (response.getCode() == HTTP_OK) {
+        HttpEntity entity = response.getEntity();
+        if (entity != null) {
+          try {
+            return EntityUtils.toString(entity);
+          } catch (ParseException ex) {
+            throw new IOException("Can't parse entity", ex);
+          }
+        } else {
+          return null;
         }
       } else {
-        return null;
+        throw new HttpsNotOkStatusException(response.getReasonPhrase(), response.getCode());
       }
     }
   }
@@ -158,6 +163,10 @@ public class ApacheHttpClient5Loader {
 
     final HttpContext context = HttpClientContext.create();
     try (final ClassicHttpResponse response = httpClient.executeOpen(target, request, context)) {
+      if (response.getCode() != HTTP_OK) {
+        throw new HttpsNotOkStatusException(response.getReasonPhrase(), response.getCode());
+      }
+
       HttpEntity entity = response.getEntity();
       if (entity != null) {
         try {
