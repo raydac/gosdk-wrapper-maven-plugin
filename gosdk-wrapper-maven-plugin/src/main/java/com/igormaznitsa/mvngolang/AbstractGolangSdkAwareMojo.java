@@ -478,6 +478,13 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
                     joining(",")) + ')').collect(
                 joining(" ")));
 
+        if (records.isEmpty()) {
+          this.logError(
+              "Cound not get any GoSDK record during request, " + sdkBaseName + " might not exist");
+          throw new MojoFailureException(
+              "Empty GoSDK record list returned by request");
+        }
+
         final Set<String> allFileNames =
             Stream.of("tar.gz", "zip").map(x -> sdkBaseName + '.' + x).collect(toSet());
 
@@ -488,8 +495,9 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
 
         if (sdkRecord == null) {
           this.logError(
-              String.format("Can't find %s among loaded records: %s", sdkBaseName, records.stream()
-                  .map(GoRecord::getName).collect(joining(","))));
+              String.format("Can't find %s among loaded records: %s", sdkBaseName,
+                  records.stream()
+                      .map(GoRecord::getName).collect(joining(","))));
           throw new MojoFailureException(
               "Can't find " + sdkBaseName + " sdk record among " + records.size() +
                   " record(s) in loaded list");
