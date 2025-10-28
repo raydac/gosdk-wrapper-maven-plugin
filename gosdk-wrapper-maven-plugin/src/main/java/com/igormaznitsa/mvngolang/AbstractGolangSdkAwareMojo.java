@@ -434,15 +434,6 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
   }
 
-  private String normalizedSdkSite() {
-    final String link = this.sdkSite.trim();
-    if (link.endsWith("/")) {
-      return link;
-    } else {
-      return link + '/';
-    }
-  }
-
   private Path findDownloadArchiveFolder() throws IOException {
     final Path result;
     if (isNullOrEmpty(this.downloadArchiveFolder)) {
@@ -539,7 +530,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
       } else {
         this.logInfo("Detected directly provided GoSDK archive name: " + this.sdkArchiveFileName);
         fileName = this.sdkArchiveFileName;
-        sdkArchiveUrl = this.normalizedSdkSite() + fileName;
+        sdkArchiveUrl = GoRecordExtractor.concatUrl(sdkSite.trim(), fileName);
       }
       this.logInfo("Loading from: " + sdkArchiveUrl);
     } else {
@@ -941,14 +932,12 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
         sdkSite.toLowerCase(Locale.ROOT).startsWith("https:")) {
       final String listOfFilesUrl =
           sdkSite.trim() + (keyPrefix == null ? "" : "?prefix=" + keyPrefix);
-
-      this.logDebug("Loading URL list document from GoSDK site: " + listOfFilesUrl);
-
+      this.logWarn("Loading GoSDK link from URI: " + listOfFilesUrl);
       text =
           ApacheHttpClient5Loader.loadResourceAsString("GET", this.makeHttpClient(), listOfFilesUrl,
               List.of("application/xml", "application/json", "text/plain", "text/html"));
     } else {
-      this.logDebug("Loading file list document from GoSDK site: " + sdkSite);
+      this.logWarn("Loading GoSDK link list as a local file: " + sdkSite);
       final File file = new File(sdkSite);
       if (!file.isFile()) {
         throw new IOException("Can't find sdk list file: " + file.getAbsolutePath());
