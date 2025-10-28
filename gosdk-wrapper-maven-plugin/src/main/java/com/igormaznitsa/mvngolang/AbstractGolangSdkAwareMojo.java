@@ -495,6 +495,8 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
                   " record(s) in loaded list");
         }
 
+        this.logDebug("Search any file among record files: " + allFileNames);
+
         record = sdkRecord.getFiles().stream()
             .filter(x -> allFileNames.contains(x.getFileName()))
             .findFirst()
@@ -640,26 +642,37 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
               "There is no XGoogHashHeader in response and no provided checksum to check the downloaded archive");
         }
       } else {
-        for (final Map.Entry<GoRecordChecksum, String> c : checksum.entrySet()) {
-          this.logInfo("Validating checksum of downloaded archive: " + c.getKey().name());
-          final String hex;
-          try (final InputStream inputStream = Files.newInputStream(tempArchivePath)) {
-            hex = c.getKey().makeHex(inputStream);
-          }
-          if (!c.getValue().equalsIgnoreCase(hex)) {
-            this.logError(c.getKey() + " : expected " + c.getValue() + " but detected " + hex);
-            throw new MojoFailureException("Wrong " + hex + " signature, expected " + c.getValue());
-          }
-        }
+        this.checkChecksums(tempArchivePath, checksum);
       }
     } else {
       this.logInfo("Copying local file archive: " + sdkArchiveUrl);
       final File archive = sdkArchiveUrl.toLowerCase(Locale.ROOT).startsWith("file:") ?
           new File(URI.create(sdkArchiveUrl)) : new File(sdkArchiveUrl);
       if (archive.isFile()) {
-        Files.copy(archive.toPath(), tempArchivePath);
+        final Path filePath = archive.toPath();
+        this.checkChecksums(filePath, checksum);
+        Files.copy(filePath, tempArchivePath);
       } else {
         throw new MojoFailureException("Can't find archive file: " + archive.getAbsolutePath());
+      }
+    }
+  }
+
+  private void checkChecksums(final Path file, final Map<GoRecordChecksum, String> checksum)
+      throws IOException, MojoFailureException {
+    if (checksum.isEmpty()) {
+      this.logWarn("There is not provided checksum info");
+    } else {
+      for (final Map.Entry<GoRecordChecksum, String> c : checksum.entrySet()) {
+        this.logInfo("Validating checksum of downloaded archive: " + c.getKey().name());
+        final String hex;
+        try (final InputStream inputStream = Files.newInputStream(file)) {
+          hex = c.getKey().makeHex(inputStream);
+        }
+        if (!c.getValue().equalsIgnoreCase(hex)) {
+          this.logError(c.getKey() + " : expected " + c.getValue() + " but detected " + hex);
+          throw new MojoFailureException("Wrong " + hex + " signature, expected " + c.getValue());
+        }
       }
     }
   }
