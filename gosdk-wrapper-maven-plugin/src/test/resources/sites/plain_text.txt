@@ -1,3 +1,4 @@
-# file name, link[,sna256]
+# file name, link[,sna256|md5]
 go1.25.3.tar.gz,https://go.dev/dl/go1.25.3.tar.gz,a81a4ba593d0015e10c51e267de3ff07c7ac914dfca037d9517d029517097795
 go1.10.1.zip,https://go.dev/dl/go1.10.1.zip
+go1.13.4.zip,https://go.dev/dl/go1.13.4.zip,d41d8cd98f00b204e9800998ecf8427e

@@ -90,15 +90,15 @@ public class GoRecordExtractor {
             final String[] split = x.split(",");
             final String fileName;
             final String fileLink;
-            final String sha256;
+            final String checksum;
             if (split.length == 3) {
               fileName = split[0].trim();
               fileLink = split[1].trim();
-              sha256 = split[2].trim();
+              checksum = split[2].trim();
             } else if (split.length == 2) {
               fileName = split[0].trim();
               fileLink = split[1].trim();
-              sha256 = null;
+              checksum = null;
             } else {
               throw new IllegalArgumentException("Wrong line: " + x);
             }
@@ -111,14 +111,27 @@ public class GoRecordExtractor {
               throw new IllegalArgumentException("Non-golang sdk file name: " + fileName);
             }
 
-            if (sha256 != null && !SHA256PATTERN.matcher(sha256).matches()) {
-              throw new IllegalArgumentException("SNA256 is wrong " + sha256);
+            final Map<GoRecordChecksum, String> checksumMap;
+            if (checksum != null) {
+              final Matcher checksumSha256 = SHA256PATTERN.matcher(checksum);
+              final Matcher checksumMd5 = MD5PATTERN.matcher(checksum);
+              if (checksumSha256.find()) {
+                checksumMap = Map.of(SHA256, checksumSha256.group(1));
+              } else if (checksumMd5.find()) {
+                checksumMap = Map.of(MD5, checksumMd5.group(1));
+              } else {
+                throw new IllegalArgumentException(
+                    "Unexpected checksum format, expected SHA256 or MD5: " + checksumSha256);
+              }
+            } else {
+              checksumMap = Map.of();
             }
 
             final GoRecord.GoFile fileRecord =
-                new GoRecord.GoFile(fileName, concatUrl(baseUrl, fileLink),
-                    sha256 == null ? Map.of() : Map.of(
-                        SHA256, sha256));
+                new GoRecord.GoFile(
+                    fileName,
+                    concatUrl(baseUrl, fileLink),
+                    checksumMap);
 
             records.merge(goSdkVersion, List.of(fileRecord),
                 (a, b) -> concat(a.stream(), b.stream()).collect(toList()));
