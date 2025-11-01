@@ -133,7 +133,7 @@ There is provided archetype for plugin based maven projects in the maven reposit
 project through call:
 
 ```shell
-mvn archetype:generate "-DarchetypeGroupId=com.igormaznitsa" "-DarchetypeArtifactId=gosdk-wrapper-maven-plugin-hello" "-DarchetypeVersion=1.1.0-SNAPSHOT"
+mvn archetype:generate "-DarchetypeGroupId=com.igormaznitsa" "-DarchetypeArtifactId=gosdk-wrapper-maven-plugin-hello" "-DarchetypeVersion=1.1.0"
 ```
 
 # GoSDK list site
