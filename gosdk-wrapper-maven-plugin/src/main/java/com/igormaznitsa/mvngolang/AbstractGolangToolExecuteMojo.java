@@ -362,10 +362,12 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
       if (this.processTimeout <= 0L) {
         this.logDebug("Waiting process, localId=" + localId);
         exitCode = process.waitFor();
+        this.logDebug("Exit code: " + exitCode);
       } else {
         final boolean result = process.waitFor(this.processTimeout, TimeUnit.MILLISECONDS);
         if (result) {
           exitCode = process.exitValue();
+          this.logDebug("Exit code: " + exitCode);
         } else {
           this.logWarn("Terminating the process due to timeout.");
           process.destroy();
