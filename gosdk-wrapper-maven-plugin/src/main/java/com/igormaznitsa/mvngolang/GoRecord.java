@@ -22,6 +22,14 @@ public class GoRecord {
     return this.files;
   }
 
+  @Override
+  public String toString() {
+    return "GoRecord{" +
+        "name='" + this.name + '\'' +
+        ", files=" + this.files +
+        '}';
+  }
+
   public static class GoFile {
     private final String fileName;
     private final String link;
@@ -44,6 +52,15 @@ public class GoRecord {
 
     public Map<GoRecordChecksum, String> getChecksum() {
       return this.checksum;
+    }
+
+    @Override
+    public String toString() {
+      return "GoFile{" +
+          "fileName='" + this.fileName + '\'' +
+          ", link='" + this.link + '\'' +
+          ", checksum=" + this.checksum +
+          '}';
     }
   }
 }

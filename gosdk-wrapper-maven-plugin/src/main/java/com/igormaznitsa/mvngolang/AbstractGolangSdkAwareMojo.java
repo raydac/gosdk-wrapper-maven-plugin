@@ -1,5 +1,6 @@
 package com.igormaznitsa.mvngolang;
 
+import static com.igormaznitsa.mvngolang.utils.FileUtils.isHttpOrHttps;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.System.out;
@@ -97,11 +98,11 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   @Parameter(property = "mvn.golang.hide.load.indicator", name = "hideLoadIndicator", defaultValue = "false")
   private boolean hideLoadIndicator;
   /**
-   * The site for GoSDK archives.
+   * The site for GoSDK archives. It has predefined values AUTO, GOOGLE_APIS, GOSDK_SITE or just a direct URI or file link.
    *
    * @since 1.0.0
    */
-  @Parameter(property = "mvn.golang.sdk.site", name = "sdkSite", defaultValue = "https://storage.googleapis.com/golang/")
+  @Parameter(property = "mvn.golang.sdk.site", name = "sdkSite", defaultValue = "AUTO")
   private String sdkSite;
   /**
    * Allows to define base SDK archive base name. If not defined then base name will be synthesized automatically.
@@ -472,6 +473,11 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
         final List<GoRecord> records = this.loadSdkListAsString(this.sdkSite.trim(),
             URLEncoder.encode(sdkBaseName, StandardCharsets.UTF_8));
 
+        if (records == null) {
+          throw new MojoFailureException(
+              "Can't download GoSDK list, may be some problems with access or changed format of SDK list, try provide direct link through sdkDownloadUrl parameter");
+        }
+
         this.logDebug("Loaded GoSDK records: " + records.stream()
             .map(x -> x.getName() + '(' +
                 x.getFiles().stream().map(GoRecord.GoFile::getFileName).collect(
@@ -527,6 +533,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
                 "Can't find any supported archive among file list for " + sdkBaseName);
           }
         } else {
+          this.logDebug("Detected record in SDK list: " + record);
           fileName = record.getFileName();
           sdkArchiveUrl = record.getLink();
           if (!record.getChecksum().isEmpty()) {
@@ -536,13 +543,13 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
             expectedChecksum = mergedChecksumMap;
           }
         }
-
       } else {
         this.logInfo("Detected directly provided GoSDK archive name: " + this.sdkArchiveFileName);
         fileName = this.sdkArchiveFileName;
         sdkArchiveUrl = GoRecordExtractor.concatUrl(sdkSite.trim(), fileName);
       }
-      this.logInfo("Loading from: " + sdkArchiveUrl);
+
+      this.logDebug("Result link to load GoSDK: " + sdkArchiveUrl);
     } else {
       if (loadAsArtifactId) {
         this.logDebug("Loading from Maven repository");
@@ -946,33 +953,51 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     }
   }
 
+  private String loadTextFromSdkSiteLink(final String link, final String keyPrefix)
+      throws IOException {
+    final String trimmed = link.trim();
+    if (isHttpOrHttps(trimmed)) {
+      final String sdkListUri =
+          trimmed + (keyPrefix == null ? "" : "?prefix=" + keyPrefix);
+      this.logInfo("Loading GoSDK link with URI: " + sdkListUri);
+      return ApacheHttpClient5Loader.loadResourceAsString("GET", this.makeHttpClient(), sdkListUri,
+          List.of("application/xml", "application/json", "text/plain", "text/html"));
+    } else {
+      this.logWarn("Loading GoSDK link list as a local file: " + trimmed);
+      final File file = new File(trimmed);
+      if (!file.isFile()) {
+        throw new IOException("Can't find SDK list file: " + file.getAbsolutePath());
+      }
+      return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+    }
+  }
+
   private List<GoRecord> loadSdkListAsString(final String sdkSite, final String keyPrefix)
       throws IOException {
-    final String text;
-    if (sdkSite.toLowerCase(Locale.ROOT).startsWith("http:") ||
-        sdkSite.toLowerCase(Locale.ROOT).startsWith("https:")) {
-      final String listOfFilesUrl =
-          sdkSite.trim() + (keyPrefix == null ? "" : "?prefix=" + keyPrefix);
-      this.logWarn("Loading GoSDK link from URI: " + listOfFilesUrl);
-      text =
-          ApacheHttpClient5Loader.loadResourceAsString("GET", this.makeHttpClient(), listOfFilesUrl,
-              List.of("application/xml", "application/json", "text/plain", "text/html"));
+    final List<String> targetSites = GoSdkSite.find(sdkSite).map(GoSdkSite::getLinks).orElse(null);
+    List<GoRecord> result = null;
+    if (targetSites == null) {
+      final String text = this.loadTextFromSdkSiteLink(sdkSite, keyPrefix);
+      result = GoRecordExtractor.getInstance().findRecords(sdkSite, text).orElse(null);
     } else {
-      this.logWarn("Loading GoSDK link list as a local file: " + sdkSite);
-      final File file = new File(sdkSite);
-      if (!file.isFile()) {
-        throw new IOException("Can't find sdk list file: " + file.getAbsolutePath());
+      for (final String link : targetSites) {
+        try {
+          this.logDebug("Attempt to load Go SDK list from: " + link);
+          final String text = this.loadTextFromSdkSiteLink(link, keyPrefix);
+          this.logDebug("Downloaded text: " + text);
+          result =
+              GoRecordExtractor.getInstance().findRecords(link, text).orElse(null);
+          if (result == null || result.isEmpty()) {
+            this.logWarn("Can't extract any GoSDK item from list downloaded from " + link);
+          } else {
+            break;
+          }
+        } catch (Exception ex) {
+          this.logError("Can't load GoSDK from " + link + ", error " + ex.getMessage());
+        }
       }
-      text = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
     }
-
-    final List<GoRecord> goRecordList =
-        GoRecordExtractor.getInstance().findRecords(sdkSite, text).orElse(null);
-    if (goRecordList == null) {
-      throw new IOException("Can't extract GoSDK items from loaded text: " + sdkSite);
-    }
-
-    return goRecordList;
+    return result;
   }
 
   private void unlockSdkFolder(final File lockFile) throws IOException {

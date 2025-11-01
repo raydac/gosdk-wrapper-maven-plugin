@@ -2,6 +2,7 @@ package com.igormaznitsa.mvngolang.utils;
 
 import static com.igormaznitsa.mvngolang.GoRecordChecksum.MD5;
 import static com.igormaznitsa.mvngolang.GoRecordChecksum.SHA256;
+import static com.igormaznitsa.mvngolang.utils.FileUtils.isHttpOrHttps;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
@@ -63,8 +64,7 @@ public class GoRecordExtractor {
     if (baseUri == null
         || baseUri.isBlank()
         || trimmedRest.toLowerCase(Locale.ROOT).startsWith("file:")
-        || trimmedRest.toLowerCase(Locale.ROOT).startsWith("http:")
-        || trimmedRest.toLowerCase(Locale.ROOT).startsWith("https:")
+        || isHttpOrHttps(trimmedRest)
     ) {
       return trimmedRest;
     } else {

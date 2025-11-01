@@ -7,6 +7,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.DosFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.apache.commons.io.file.PathUtils;
@@ -28,6 +29,14 @@ public final class FileUtils {
   );
 
   private FileUtils() {
+  }
+
+  public static boolean isHttpOrHttps(final String uri) {
+    if (uri == null) {
+      return false;
+    }
+    final String normalized = uri.trim().toLowerCase(Locale.ROOT);
+    return normalized.startsWith("http://") || normalized.startsWith("https://");
   }
 
   private static void tryResetAllAttributes(final Path path, final LinkOption[] linkOptions)
