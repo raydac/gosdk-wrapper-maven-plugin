@@ -2,14 +2,13 @@
 
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%20License%202.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Java 11.0+](https://img.shields.io/badge/java-11.0%2b-green.svg)](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-[![Maven Central](https://img.shields.io/maven-central/v/com.igormaznitsa/gosdk-wrapper-maven-plugin)](http://search.maven.org/#artifactdetails|com.igormaznitsa|gosdk-wrapper-maven-plugin|1.0.5|jar)
-[![Maven 3.8.1+](https://img.shields.io/badge/maven-3.8.1%2b-green.svg)](https://maven.apache.org/)
-[![PayPal donation](https://img.shields.io/badge/donation-PayPal-cyan.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AHWJHJFBAWGL2)
-[![YooMoney donation](https://img.shields.io/badge/donation-Yoo.money-blue.svg)](https://yoomoney.ru/to/41001158080699)
+[![Maven Central](https://img.shields.io/maven-central/v/com.igormaznitsa/gosdk-wrapper-maven-plugin)](http://search.maven.org/#artifactdetails|com.igormaznitsa|gosdk-wrapper-maven-plugin|1.1.0|jar)
+[![Maven 3.8.1+](https://img.shields.io/badge/maven-3.8.1%2b-green.svg)](https://maven.apache.org/)   
+[![Arthur's acres sanctuary donation](assets/arthur_sanctuary_banner.png)](https://www.arthursacresanimalsanctuary.org/donate)
 
 # Changelog
 
-__1.1.0 (SNAPSHOT)__
+__1.1.0 (01-nov-2025)__
 
 - improved parsing of SDK list to support many formats and be prepared for load SDK through site instead of
   store [#7](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/7)
@@ -75,9 +74,9 @@ pom.xml build section
 <plugin>
     <groupId>com.igormaznitsa</groupId>
     <artifactId>gosdk-wrapper-maven-plugin</artifactId>
-    <version>1.0.5</version>
+    <version>1.1.0</version>
     <configuration>
-        <goVersion>1.24.4</goVersion>
+        <goVersion>1.25.3</goVersion>
     </configuration>
     <executions>
         <execution>
@@ -127,3 +126,45 @@ For instance
     </plugin>
 </plugins>
 ```
+
+# Generate Maven project from archetype
+
+There is provided archetype for plugin based maven projects in the maven repository. You can very easily to generate a
+project through call:
+
+```shell
+mvn archetype:generate "-DarchetypeGroupId=com.igormaznitsa" "-DarchetypeArtifactId=gosdk-wrapper-maven-plugin-hello" "-DarchetypeVersion=1.1.0-SNAPSHOT"
+```
+
+# GoSDK list site
+
+By default, the plugin uses `https://storage.googleapis.com/golang/` to retrieve the list of available Go SDKs.  
+However, there is a potential risk that Google may restrict anonymous access to this site or move it elsewhere.
+
+To address this, the plugin provides the `sdkSite` parameter, which allows you to specify a custom URL for the SDK list
+source.  
+It also includes several predefined values:
+
+- **AUTO** — Load the Go SDK list from the default location.
+- **GOOGLE_APIS** — Load the Go SDK list from `https://storage.googleapis.com/golang/`.
+- **GOSDK_SITE** — Load the Go SDK list from `https://go.dev/dl/`.
+
+For example, to switch directly to the Go SDK web page, you can configure the plugin as follows:
+
+```xml
+
+<plugin>
+    <groupId>com.igormaznitsa</groupId>
+    <artifactId>gosdk-wrapper-maven-plugin</artifactId>
+    <version>1.1.0</version>
+    <configuration>
+        <sdkSite>GOSDK_SITE</sdkSite>
+        <goVersion>1.25.3</goVersion>
+    </configuration>
+</plugin>
+```
+
+You can also provide a direct URI or even a local file path as the value of sdkSite. The plugin supports multiple
+formats, including HTML, XML, JSON, and plain text.
+You can find examples of these formats in
+the [test resources directory](/gosdk-wrapper-maven-plugin/src/test/resources/sites).   
