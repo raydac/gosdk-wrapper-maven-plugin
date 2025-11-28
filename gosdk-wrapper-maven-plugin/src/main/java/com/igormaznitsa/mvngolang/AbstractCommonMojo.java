@@ -18,7 +18,6 @@ import org.apache.maven.settings.Settings;
 
 public abstract class AbstractCommonMojo extends AbstractMojo {
 
-  protected static final String DEFAULT_GO_PATH_FOLDER = ".go_path";
   @Parameter(defaultValue = "${project.basedir}", readonly = true)
   protected File baseDir;
   @Parameter(defaultValue = "${settings}", readonly = true)
@@ -119,9 +118,6 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
 
   protected abstract boolean isSkip();
 
-  protected File makeDefaultGoPath() {
-    return new File(this.storeFolder, DEFAULT_GO_PATH_FOLDER);
-  }
 
   protected void logTrace(final String text) {
     if (text != null && this.trace && this.getLog().isDebugEnabled()) {

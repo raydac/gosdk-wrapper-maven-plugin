@@ -228,7 +228,7 @@ public abstract class AbstractGolangToolExecuteMojo extends AbstractGolangSdkAwa
     }
 
     if (!processBuilder.environment().containsKey("GOPATH") && this.mayAddInternalGOPATH) {
-      final File defaultGoPath = this.makeDefaultGoPath();
+      final File defaultGoPath = goSdkFolder.toFile();
       if (processBuilder.environment().put("GOPATH", defaultGoPath.getAbsolutePath()) == null) {
         this.logInfo("GOPATH not found; defaulting to internal folder: " + defaultGoPath);
       }
