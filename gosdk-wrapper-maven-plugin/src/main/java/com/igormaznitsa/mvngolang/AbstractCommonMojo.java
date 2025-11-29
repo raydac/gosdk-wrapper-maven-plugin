@@ -1,7 +1,17 @@
 package com.igormaznitsa.mvngolang;
 
+import static java.nio.file.Files.isRegularFile;
+import static java.util.stream.Collectors.toSet;
+
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ResolutionErrorHandler;
@@ -115,6 +125,70 @@ public abstract class AbstractCommonMojo extends AbstractMojo {
 
   protected static String findArchiveExtensionForOs() {
     return SystemUtils.IS_OS_WINDOWS ? "zip" : "tar.gz";
+  }
+
+  protected static List<Path> findExecutable(
+      final String fileName,
+      final List<Path> folders,
+      final boolean findInBinSubfolder,
+      final boolean walkSubfolders) throws IOException {
+    if (fileName == null) {
+      throw new NullPointerException("File name is null");
+    }
+
+    if (SystemUtils.IS_OS_WINDOWS && fileName.contains(":")) {
+      throw new IllegalArgumentException("Illegal file name: " + fileName);
+    }
+
+    if (fileName.contains("/") || fileName.contains("\\")) {
+      final List<Path> result = new ArrayList<>();
+      for (final Path p : folders) {
+        final Path filePath = p.resolve(fileName);
+        if (isRegularFile(filePath)) {
+          result.add(filePath);
+        }
+      }
+      return result;
+    }
+
+    final Set<String> variants;
+    if (fileName.contains(".")) {
+      variants = Set.of(fileName);
+    } else {
+      final List<String> possibleExtensions;
+      if (SystemUtils.IS_OS_WINDOWS) {
+        possibleExtensions = List.of(".exe", ".cmd", ".bat");
+      } else {
+        possibleExtensions = List.of(".sh", "");
+      }
+      variants = possibleExtensions.stream()
+          .flatMap(x -> Stream.of(x, x.toUpperCase(Locale.ENGLISH)))
+          .map(x -> fileName + x)
+          .collect(toSet());
+    }
+
+    final List<Path> result = new ArrayList<>();
+    if (findInBinSubfolder) {
+      for (final Path path : folders) {
+        final Path folderBin = path.resolve("bin");
+        if (Files.isDirectory(folderBin)) {
+          try (
+              Stream<Path> walker = Files.walk(folderBin, walkSubfolders ? Integer.MAX_VALUE : 1)) {
+            walker
+                .filter(x -> isRegularFile(x) && variants.contains(x.getFileName().toString()))
+                .forEach(result::add);
+          }
+        }
+      }
+    } else {
+      for (final Path path : folders) {
+        try (Stream<Path> walker = Files.walk(path, walkSubfolders ? Integer.MAX_VALUE : 1)) {
+          walker.filter(x -> isRegularFile(x) && variants.contains(x.getFileName().toString()))
+              .forEach(result::add);
+        }
+      }
+    }
+    return result;
   }
 
   protected abstract boolean isSkip();
