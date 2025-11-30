@@ -7,7 +7,7 @@ Just add the plugin into the module build section.
 <plugin>
     <groupId>com.igormaznitsa</groupId>
     <artifactId>gosdk-wrapper-maven-plugin</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <configuration>
         <goVersion>1.25.4</goVersion>
     </configuration>

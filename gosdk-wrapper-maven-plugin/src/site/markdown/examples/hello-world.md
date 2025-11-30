@@ -3,7 +3,7 @@
 You can use the special maven archetype to generate a compilable single module skeleton.
 
 ```bash
-mvn archetype:generate -DarchetypeGroupId=com.igormaznitsa -DarchetypeArtifactId=gosdk-wrapper-maven-plugin-hello -DarchetypeVersion=1.1.1
+mvn archetype:generate -DarchetypeGroupId=com.igormaznitsa -DarchetypeArtifactId=gosdk-wrapper-maven-plugin-hello -DarchetypeVersion=1.1.2
 ```
 
 It will generate project tree
