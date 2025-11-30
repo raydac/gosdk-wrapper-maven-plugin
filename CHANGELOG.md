@@ -1,3 +1,7 @@
+__1.1.1 (30-nov-2025)__
+
+    - added `cache-sdk` mojo to ensure load GoSDK and to provide way to export paths to work folders through inject of maven project properties
+
 # 1.1.0 (01-nov-2025)
 
     - Improved parsing of SDK list to support many formats and be prepared for load SDK through site instead of store [#7](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/7)  

@@ -63,6 +63,18 @@
                     </envLast>
                 </configuration>
                 <executions>
+                    <!-- Keep this execution if you need access to paths of GoSDK as project properties -->
+                    <execution>
+                        <id>load-go-sdk-and-export-paths-into-properties</id>
+                        <goals>
+                            <goal>cache-sdk</goal>
+                        </goals>
+                        <configuration>
+                            <propertyGoSdkPath>gowrapper.cached.sdk.path</propertyGoSdkPath>
+                            <propertyDefaultGoPath>gowrapper.default.gopath</propertyDefaultGoPath>
+                            <propertyGoCommandPath>gowrapper.command.path</propertyGoCommandPath>
+                        </configuration>
+                    </execution>
                     <!-- Remove temporary and work folders -->
                     <execution>
                         <id>remove-go-temp-build-folder</id>

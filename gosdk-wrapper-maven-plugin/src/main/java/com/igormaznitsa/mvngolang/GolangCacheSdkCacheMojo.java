@@ -15,8 +15,8 @@ import org.apache.maven.plugins.annotations.Parameter;
  *
  * @since 1.1.1
  */
-@Mojo(name = "cache", defaultPhase = LifecyclePhase.INITIALIZE, threadSafe = true)
-public class GolangSdkCacheMojo extends AbstractGolangSdkAwareMojo {
+@Mojo(name = "cache-sdk", defaultPhase = LifecyclePhase.INITIALIZE, threadSafe = true)
+public class GolangCacheSdkCacheMojo extends AbstractGolangSdkAwareMojo {
 
   /**
    * Skip execution of the mojo.
@@ -27,8 +27,8 @@ public class GolangSdkCacheMojo extends AbstractGolangSdkAwareMojo {
   /**
    * If it is not empty then it defines a project property name to export cached GoSDK path as an absolute path.
    */
-  @Parameter(name = "propertySdkPath", defaultValue = "")
-  private String propertySdkPath;
+  @Parameter(name = "propertyGoSdkPath", defaultValue = "")
+  private String propertyGoSdkPath;
 
   /**
    * If it is not empty then it defines a project property name to the default go path folder as an absolute path.
@@ -37,10 +37,10 @@ public class GolangSdkCacheMojo extends AbstractGolangSdkAwareMojo {
   private String propertyDefaultGoPath;
 
   /**
-   * If it is not empty then it defines a project property name to export file path to the executable go file in the cached sdk.
+   * If it is not empty then it defines a project property name to export file path to the executable go command file found in the target GoSDK.
    */
-  @Parameter(name = "propertyGoExecutablePath", defaultValue = "")
-  private String propertyGoExecutablePath;
+  @Parameter(name = "propertyGoCommandPath", defaultValue = "")
+  private String propertyGoCommandPath;
 
   private static String getSafeString(final String value) {
     return value == null ? "" : value.trim();
@@ -50,9 +50,9 @@ public class GolangSdkCacheMojo extends AbstractGolangSdkAwareMojo {
   protected void onMojoExecute(final Path goSdkFolder)
       throws IOException, MojoFailureException {
 
-    final String namePropertySdkPath = getSafeString(this.propertySdkPath);
+    final String namePropertySdkPath = getSafeString(this.propertyGoSdkPath);
     final String namePropertyDefaultGoPath = getSafeString(this.propertyDefaultGoPath);
-    final String namePropertyGoExecutablePath = getSafeString(this.propertyGoExecutablePath);
+    final String namePropertyGoCommandPath = getSafeString(this.propertyGoCommandPath);
 
     if (!namePropertySdkPath.isEmpty()) {
       final String path = goSdkFolder.toAbsolutePath().toString();
@@ -60,7 +60,7 @@ public class GolangSdkCacheMojo extends AbstractGolangSdkAwareMojo {
           "Exporting the cached GoSDK path as a project property '" + namePropertySdkPath + "': " +
               path);
       this.project.getProperties()
-          .setProperty(namePropertySdkPath, goSdkFolder.toAbsolutePath().toString());
+          .setProperty(namePropertySdkPath, path);
     }
 
     if (!namePropertyDefaultGoPath.isEmpty()) {
@@ -70,7 +70,7 @@ public class GolangSdkCacheMojo extends AbstractGolangSdkAwareMojo {
       this.project.getProperties().setProperty(namePropertyDefaultGoPath, path);
     }
 
-    if (!namePropertyGoExecutablePath.isEmpty()) {
+    if (!namePropertyGoCommandPath.isEmpty()) {
       final List<Path> paths = findExecutable("go", List.of(goSdkFolder), true, true);
 
       final Path foundFilePath;
@@ -89,9 +89,9 @@ public class GolangSdkCacheMojo extends AbstractGolangSdkAwareMojo {
       }
 
       this.logInfo("Exporting the executable go file path as a project property '" +
-          namePropertyGoExecutablePath + "': " + foundFilePath);
+          namePropertyGoCommandPath + "': " + foundFilePath);
       this.project.getProperties()
-          .setProperty(namePropertyGoExecutablePath, foundFilePath.toString());
+          .setProperty(namePropertyGoCommandPath, foundFilePath.toString());
     }
   }
 
