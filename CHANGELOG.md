@@ -1,4 +1,9 @@
-__1.1.1 (30-nov-2025)__
+# 1.1.2 (09-dec-2025)
+
+    - fixed search of appropriate GoSDK site in default AUTO mode  [#11](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/11)
+    - added `forceGoSdkFromPath` boolean flag to force search of installed GoSDK folder among folders listed in OS PATH environment variable [#10](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/10)
+
+# 1.1.1 (30-nov-2025)
 
     - added `cache-sdk` mojo to ensure load GoSDK and to provide way to export paths to work folders through inject of maven project properties
 

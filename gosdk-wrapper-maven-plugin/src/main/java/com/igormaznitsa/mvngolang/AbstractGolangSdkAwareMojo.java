@@ -153,12 +153,12 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   private String sdkDownloadUrl;
 
   /**
-   * Force search of a GoSDK folder among folders listed in host OS PATH variable.
+   * Force search of a GoSDK folder among folders listed in the host OS PATH variable.
    *
    * @since 1.1.2
    */
-  @Parameter(property = "mvn.golang.sdk.force.from.env.path", name = "forceGoSdkFolderFromEnvPath", defaultValue = "false")
-  private boolean forceGoSdkFolderFromEnvPath;
+  @Parameter(property = "mvn.golang.sdk.force.from.path", name = "forceGoSdkFromPath", defaultValue = "false")
+  private boolean forceGoSdkFromPath;
 
   /**
    * Maven artifact id to load GoSDK archive as an artifact from current Maven repository. It has the highest priority during SDK download.
@@ -174,13 +174,15 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.sdk.artifact.id", name = "sdkArtifactId")
   private String sdkArtifactId;
+
   /**
    * GoSDK version.
    *
    * @since 1.0.0
    */
-  @Parameter(property = "mvn.golang.go.version", name = "goVersion", defaultValue = "1.24.4")
+  @Parameter(property = "mvn.golang.go.version", name = "goVersion", defaultValue = "1.25.5")
   private String goVersion;
+
   /**
    * GoSDK OS.
    *
@@ -188,6 +190,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.os", name = "os")
   private String os;
+
   /**
    * GoSDK architecture.
    *
@@ -195,6 +198,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.arch", name = "arch")
   private String arch;
+
   /**
    * Optional suffix for OSX.
    *
@@ -202,6 +206,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.osx.version", name = "osxVersion")
   private String osxVersion;
+
   /**
    * Force GoSDK archive file name.
    *
@@ -209,6 +214,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.sdk.archive.file.name", name = "sdkArchiveFileName")
   private String sdkArchiveFileName;
+
   /**
    * Connection timeout for HTTP client operations.
    *
@@ -216,6 +222,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.connection.timeout.ms", name = "connectionTimeout", defaultValue = "60000")
   private long connectionTimeout = 60_000L;
+
   /**
    * Force use maven proxy settings.
    *
@@ -223,6 +230,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
    */
   @Parameter(property = "mvn.golang.use.maven.proxy", name = "useMavenProxy", defaultValue = "true")
   private boolean useMavenProxy;
+
   /**
    * Guess GoSDK archive file extension based on host os.
    *
@@ -298,7 +306,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
     final long startTime = System.currentTimeMillis();
     final Path goSdkFolder;
 
-    if (this.forceGoSdkFolderFromEnvPath) {
+    if (this.forceGoSdkFromPath) {
       final String path = OsUtils.findEnvPath().orElse(null);
       if (path == null) {
         this.getLog()

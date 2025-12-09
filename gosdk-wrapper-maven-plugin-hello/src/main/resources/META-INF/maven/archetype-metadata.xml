@@ -21,10 +21,10 @@
             <defaultValue>main</defaultValue>
         </requiredProperty>
         <requiredProperty key="gosdkwrapper">
-            <defaultValue>1.1.2-SNAPSHOT</defaultValue>
+            <defaultValue>1.1.2</defaultValue>
         </requiredProperty>
         <requiredProperty key="gosdk">
-            <defaultValue>1.25.4</defaultValue>
+            <defaultValue>1.25.5</defaultValue>
         </requiredProperty>
     </requiredProperties>
 

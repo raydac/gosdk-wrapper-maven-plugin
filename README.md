@@ -2,11 +2,18 @@
 
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%20License%202.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Java 11.0+](https://img.shields.io/badge/java-11.0%2b-green.svg)](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-[![Maven Central](https://img.shields.io/maven-central/v/com.igormaznitsa/gosdk-wrapper-maven-plugin)](http://search.maven.org/#artifactdetails|com.igormaznitsa|gosdk-wrapper-maven-plugin|1.1.1|jar)
+[![Maven Central](https://img.shields.io/maven-central/v/com.igormaznitsa/gosdk-wrapper-maven-plugin)](http://search.maven.org/#artifactdetails|com.igormaznitsa|gosdk-wrapper-maven-plugin|1.1.2|jar)
 [![Maven 3.8.1+](https://img.shields.io/badge/maven-3.8.1%2b-green.svg)](https://maven.apache.org/)   
 [![Arthur's acres sanctuary donation](assets/arthur_sanctuary_banner.png)](https://www.arthursacresanimalsanctuary.org/donate)
 
 # Changelog
+
+__1.1.2 (09-dec-2025)__
+
+- fixed search of appropriate GoSDK site in default AUTO
+  mode  [#11](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/11)
+- added `forceGoSdkFromPath` boolean flag to force search of installed GoSDK folder among folders listed in OS PATH
+  environment variable [#10](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/10)
 
 __1.1.1 (30-nov-2025)__
 
@@ -75,9 +82,9 @@ pom.xml build section
 <plugin>
     <groupId>com.igormaznitsa</groupId>
     <artifactId>gosdk-wrapper-maven-plugin</artifactId>
-    <version>1.1.1</version>
+  <version>1.1.2</version>
     <configuration>
-        <goVersion>1.25.4</goVersion>
+      <goVersion>1.25.5</goVersion>
     </configuration>
     <executions>
         <execution>
@@ -158,9 +165,9 @@ Every GoSDK contains the GO command file, and it is possible export the path to 
 <plugin>
     <groupId>com.igormaznitsa</groupId>
     <artifactId>gosdk-wrapper-maven-plugin</artifactId>
-    <version>1.1.1</version>
+  <version>1.1.2</version>
     <configuration>
-        <goVersion>1.25.4</goVersion>
+      <goVersion>1.25.5</goVersion>
     </configuration>
     <executions>
         <execution>
@@ -184,7 +191,7 @@ There is provided archetype for plugin based maven projects in the maven reposit
 project through call:
 
 ```shell
-        mvn archetype:generate "-DarchetypeGroupId=com.igormaznitsa" "-DarchetypeArtifactId=gosdk-wrapper-maven-plugin-hello" "-DarchetypeVersion=1.1.1"
+        mvn archetype:generate "-DarchetypeGroupId=com.igormaznitsa" "-DarchetypeArtifactId=gosdk-wrapper-maven-plugin-hello" "-DarchetypeVersion=1.1.2"
 ```
 
 # GoSDK list site
@@ -207,10 +214,10 @@ For example, to switch directly to the Go SDK web page, you can configure the pl
 <plugin>
     <groupId>com.igormaznitsa</groupId>
     <artifactId>gosdk-wrapper-maven-plugin</artifactId>
-    <version>1.1.1</version>
+  <version>1.1.2</version>
     <configuration>
         <sdkSite>GOSDK_SITE</sdkSite>
-        <goVersion>1.25.4</goVersion>
+      <goVersion>1.25.5</goVersion>
     </configuration>
 </plugin>
 ```
