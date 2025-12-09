@@ -49,6 +49,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.settings.Proxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -66,6 +68,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
       );
   private static final long LOCK_FILE_SLEEP_MS = 100;
   private static final Duration DELAY_LOCK_FILE_NOTIFICATION = Duration.ofSeconds(15);
+  private static final Logger log = LoggerFactory.getLogger(AbstractGolangSdkAwareMojo.class);
   /**
    * Section describing proxy settings.
    * <pre>{@code
@@ -916,6 +919,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
       final String text = this.loadTextFromSdkSiteLink(sdkSite, keyPrefix);
       result = GoRecordExtractor.getInstance().findRecords(sdkSite, text).orElse(null);
     } else {
+      this.logInfo("Using search mode: " + sdkSite + "  " + targetSites);
       for (final String link : targetSites) {
         try {
           this.logDebug("Attempt to load Go SDK list from: " + link);
@@ -929,7 +933,7 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
             break;
           }
         } catch (Exception ex) {
-          this.logError("Can't load GoSDK from " + link + ", error " + ex.getMessage());
+          this.logError("Can't load GoSDK from " + link + " : " + ex.getMessage());
         }
       }
     }

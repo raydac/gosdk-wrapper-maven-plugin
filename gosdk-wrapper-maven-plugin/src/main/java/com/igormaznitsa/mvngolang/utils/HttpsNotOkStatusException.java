@@ -7,6 +7,8 @@ public class HttpsNotOkStatusException extends IOException {
   private final String reason;
 
   public HttpsNotOkStatusException(final String reason, final int status) {
+    super(
+        "HTTP response status is " + status + ", reason is " + (reason == null ? "none" : reason));
     this.reason = reason;
     this.status = status;
   }

@@ -24,9 +24,7 @@ public enum GoSdkSite {
       return Optional.empty();
     }
     final String normalized = name.trim().toUpperCase(Locale.ROOT);
-    return Arrays.stream(GoSdkSite.values()).filter(x -> x.name().equals(normalized)).findFirst()
-        .map(x -> x ==
-            AUTO ? GOOGLE_APIS : x);
+    return Arrays.stream(GoSdkSite.values()).filter(x -> x.name().equals(normalized)).findFirst();
   }
 
   public List<String> getLinks() {
