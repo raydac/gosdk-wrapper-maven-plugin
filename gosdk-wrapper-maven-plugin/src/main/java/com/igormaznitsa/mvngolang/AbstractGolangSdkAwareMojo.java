@@ -13,6 +13,7 @@ import static java.util.stream.Collectors.toSet;
 import com.igormaznitsa.mvngolang.utils.ApacheHttpClient5Loader;
 import com.igormaznitsa.mvngolang.utils.ArchiveUnpacker;
 import com.igormaznitsa.mvngolang.utils.GoRecordExtractor;
+import com.igormaznitsa.mvngolang.utils.OsUtils;
 import com.igormaznitsa.mvngolang.utils.ProxySettings;
 import java.io.File;
 import java.io.IOException;
@@ -152,6 +153,14 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   private String sdkDownloadUrl;
 
   /**
+   * Force search of a GoSDK folder among folders listed in host OS PATH variable.
+   *
+   * @since 1.1.2
+   */
+  @Parameter(property = "mvn.golang.sdk.force.from.env.path", name = "forceGoSdkFolderFromEnvPath", defaultValue = "false")
+  private boolean forceGoSdkFolderFromEnvPath;
+
+  /**
    * Maven artifact id to load GoSDK archive as an artifact from current Maven repository. It has the highest priority during SDK download.
    * Expected format groupId:artifactId:version[:type[:classifier]]
    * If the type is not defined, the archive extension will be automatically determined based on the host OS.
@@ -288,20 +297,40 @@ public abstract class AbstractGolangSdkAwareMojo extends AbstractCommonMojo {
   public final void doExecute() throws MojoExecutionException, MojoFailureException {
     final long startTime = System.currentTimeMillis();
     final Path goSdkFolder;
-    if (isNullOrEmpty(this.preinstalledSdkFolder)) {
-      final String sdkBaseName = this.findSdkBaseName();
-      if (sdkBaseName.isBlank()) {
+
+    if (this.forceGoSdkFolderFromEnvPath) {
+      final String path = OsUtils.findEnvPath().orElse(null);
+      if (path == null) {
+        this.getLog()
+            .error("Direct request to search a GoSDK among OS PATH folders but PATH not found");
         throw new MojoExecutionException(
-            "Detected blank GoSDK base name, may be wrong config properties");
+            "Can't find PATH environment variable in host OS environment");
       }
-      this.logOptional("Found sdkBaseName: " + sdkBaseName);
-      goSdkFolder = this.ensureCachedGoSdk(sdkBaseName);
+      this.getLog().warn("Direct request to search a GoSDK among OS PATH folders: " + path);
+      goSdkFolder = OsUtils.findGoSdkFolderInPath(path).orElse(null);
+      if (goSdkFolder == null) {
+        throw new MojoFailureException(
+            "Can't find a GoSDK folder among folders defined in OS PATH environment variable: " +
+                path);
+      } else {
+        this.getLog().info("Found GoSDK folder in OS PATH: " + goSdkFolder);
+      }
     } else {
-      this.logInfo("Provided pre-installed GoSDK folder: " + this.preinstalledSdkFolder);
-      goSdkFolder = new File(this.preinstalledSdkFolder).toPath();
-      if (!Files.isDirectory(goSdkFolder)) {
-        throw new MojoExecutionException(
-            "Can't find defined pre-installed GoSDK folder: " + this.preinstalledSdkFolder);
+      if (isNullOrEmpty(this.preinstalledSdkFolder)) {
+        final String sdkBaseName = this.findSdkBaseName();
+        if (sdkBaseName.isBlank()) {
+          throw new MojoExecutionException(
+              "Detected blank GoSDK base name, may be wrong config properties");
+        }
+        this.logOptional("Found sdkBaseName: " + sdkBaseName);
+        goSdkFolder = this.ensureCachedGoSdk(sdkBaseName);
+      } else {
+        this.logInfo("Provided pre-installed GoSDK folder: " + this.preinstalledSdkFolder);
+        goSdkFolder = new File(this.preinstalledSdkFolder).toPath();
+        if (!Files.isDirectory(goSdkFolder)) {
+          throw new MojoExecutionException(
+              "Can't find defined pre-installed GoSDK folder: " + this.preinstalledSdkFolder);
+        }
       }
     }
     try {
