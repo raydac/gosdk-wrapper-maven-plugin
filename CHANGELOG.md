@@ -1,3 +1,7 @@
+# 1.1.3 (SNAPSHOT)
+
+    -
+
 # 1.1.2 (09-dec-2025)
 
     - fixed search of appropriate GoSDK site in default AUTO mode  [#11](https://github.com/raydac/gosdk-wrapper-maven-plugin/issues/11)
